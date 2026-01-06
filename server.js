@@ -64,7 +64,11 @@ try {
 
 // --- Yardımcı Fonksiyonlar ---
 function loadMessages() {
-    try { return JSON.parse(fs.readFileSync(MESSAGES_DB_PATH)); } catch (e) { return {}; }
+    try { 
+        // Dosya boşsa veya bozuksa boş obje döndür
+        const data = fs.readFileSync(MESSAGES_DB_PATH);
+        return data.length > 0 ? JSON.parse(data) : {};
+    } catch (e) { return {}; }
 }
 
 function saveMessage(channelId, message) {
@@ -72,7 +76,8 @@ function saveMessage(channelId, message) {
         const db = loadMessages();
         if (!db[channelId]) db[channelId] = [];
         db[channelId].push(message);
-        if (db[channelId].length > 100) db[channelId] = db[channelId].slice(-100);
+        // Limit 500 mesaja çıkarıldı (Daha uzun sohbet geçmişi)
+        if (db[channelId].length > 500) db[channelId] = db[channelId].slice(-500);
         fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify(db, null, 2));
     } catch (e) {
         console.error("Mesaj kaydetme hatası:", e);
@@ -90,6 +95,19 @@ function saveUser(user) {
         fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
     } catch (e) {
         console.error("Kullanıcı kaydetme hatası:", e);
+    }
+}
+
+function updateUserAvatar(userId, newAvatar) {
+    try {
+        const users = loadUsers();
+        const index = users.findIndex(u => u.id === userId);
+        if (index !== -1) {
+            users[index].avatar = newAvatar;
+            fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
+        }
+    } catch (e) {
+        console.error("Kullanıcı güncelleme hatası:", e);
     }
 }
 
@@ -111,8 +129,8 @@ io.on('connection', (socket) => {
       if (existing) {
           socket.emit('auth-error', 'Bu kullanıcı adı zaten alınmış.');
       } else {
-          // Varsayılan Instagram-style avatar
-          const defaultAvatar = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
+          // Varsayılan Instagram-style avatar (Base64)
+          const defaultAvatar = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2JjYmNiYyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==";
           
           const newUser = {
               id: 'user-' + Date.now(),
@@ -191,6 +209,19 @@ io.on('connection', (socket) => {
   socket.on('update-status', (status) => {
       if (connectedUsers[socket.id]) {
           connectedUsers[socket.id] = { ...connectedUsers[socket.id], ...status };
+          io.emit('user-update', Object.values(connectedUsers));
+      }
+  });
+
+  socket.on('update-profile', ({ avatar }) => {
+      if (connectedUsers[socket.id]) {
+          // Update in-memory
+          connectedUsers[socket.id].avatar = avatar;
+          
+          // Update database persistence
+          updateUserAvatar(connectedUsers[socket.id].id, avatar);
+          
+          // Broadcast to everyone
           io.emit('user-update', Object.values(connectedUsers));
       }
   });
