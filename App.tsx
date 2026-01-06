@@ -219,8 +219,7 @@ const App: React.FC = () => {
       
       socket.on('connect_error', (err) => {
           setConnectionState(ConnectionState.ERROR);
-          // Hata mesajını daha açıklayıcı yapalım
-          setAuthError(`Sunucuya bağlanılamadı (${err.message}). Lütfen 'node server.js' komutu ile sunucunun çalıştığından emin olun.`);
+          setAuthError(`Sunucu bağlantı hatası: ${err.message}. Lütfen sunucunun (node server.js) çalıştığını kontrol edin.`);
           setAuthLoading(false);
       });
 
