@@ -23,6 +23,7 @@ const InviteIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://
 const ServerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>;
 const MessageSquareIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
 const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
+const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>;
 
 type ViewMode = 'voice' | 'chat';
 const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
@@ -33,9 +34,10 @@ const App: React.FC = () => {
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
 
   // --- Auth State ---
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [authUsername, setAuthUsername] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -175,6 +177,7 @@ const App: React.FC = () => {
 
       // Let Socket.io handle transports automatically (polling -> websocket) to avoid errors
       const socket = io(url, {
+          transports: ['websocket', 'polling'], // XHR Poll hatasını önlemek için eklendi
           reconnection: true,
           reconnectionAttempts: 5,
           timeout: 20000,
@@ -275,6 +278,23 @@ const App: React.FC = () => {
   const handleAuthSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       
+      if (authMode === 'forgot') {
+          if (!resetEmail.trim()) {
+              setAuthError("Lütfen e-posta adresinizi girin.");
+              return;
+          }
+          setAuthLoading(true);
+          setAuthError("");
+          // Simüle edilmiş şifre sıfırlama işlemi
+          setTimeout(() => {
+              setAuthLoading(false);
+              alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. (Simülasyon)");
+              setAuthMode('login');
+              setResetEmail("");
+          }, 1500);
+          return;
+      }
+
       if (!authUsername.trim() || !authPassword.trim()) {
           setAuthError("Kullanıcı adı ve şifre zorunludur.");
           return;
@@ -387,11 +407,11 @@ const App: React.FC = () => {
       }
       
       // Tüm peer bağlantılarını kapat
-      Object.values(peersRef.current).forEach(p => p.close());
+      Object.values(peersRef.current).forEach((p: RTCPeerConnection) => p.close());
       peersRef.current = {};
       
       // Ses elementlerini temizle
-      Object.values(remoteAudioRefs.current).forEach(el => el.remove());
+      Object.values(remoteAudioRefs.current).forEach((el: HTMLAudioElement) => el.remove());
       remoteAudioRefs.current = {};
 
       if (socketRef.current) {
@@ -436,7 +456,7 @@ const App: React.FC = () => {
 
             stream.getTracks().forEach(track => {
                  track.onended = () => toggleScreenShare(); 
-                 Object.values(peersRef.current).forEach(peer => {
+                 Object.values(peersRef.current).forEach((peer: RTCPeerConnection) => {
                      peer.addTrack(track, stream);
                  });
             });
@@ -603,20 +623,26 @@ const App: React.FC = () => {
   // LOGIN SCREEN
   if (!isLoggedIn) {
       return (
-          <div className="flex h-screen w-screen bg-[url('https://cdn.discordapp.com/attachments/1079509378393587783/1085605790403448902/discord_background.png')] bg-cover items-center justify-center font-sans relative">
-              
+          <div className="flex h-screen w-screen bg-[url('https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center items-center justify-center font-sans relative">
+              {/* Overlay for better readability */}
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0"></div>
+
               <button 
                   onClick={() => setIsServerModalOpen(true)}
-                  className="absolute top-6 left-6 flex items-center text-white/70 hover:text-white bg-black/50 hover:bg-black/70 px-4 py-2 rounded-lg transition-all font-medium backdrop-blur-sm"
+                  className="absolute top-6 left-6 flex items-center text-white/70 hover:text-white bg-black/50 hover:bg-black/70 px-4 py-2 rounded-lg transition-all font-medium backdrop-blur-sm z-20"
               >
                   <ArrowLeftIcon className="w-5 h-5 mr-2" />
                   Sunucu Değiştir
               </button>
-
+              
               <div className="bg-[#36393f] p-8 rounded shadow-2xl w-full max-w-sm relative z-10">
                   <div className="text-center mb-6">
-                      <h2 className="text-2xl font-bold text-white mb-2">{authMode === 'login' ? 'Tekrar Hoş Geldin!' : 'Hesap Oluştur'}</h2>
-                      <p className="text-gray-400 text-sm">{authMode === 'login' ? 'Seni tekrar görmek çok güzel!' : 'Aramıza katılmaya hazır mısın?'}</p>
+                      <h2 className="text-2xl font-bold text-white mb-2">
+                          {authMode === 'login' ? 'Tekrar Hoş Geldin!' : (authMode === 'register' ? 'Hesap Oluştur' : 'Şifre Sıfırlama')}
+                      </h2>
+                      <p className="text-gray-400 text-sm">
+                          {authMode === 'login' ? 'Seni tekrar görmek çok güzel!' : (authMode === 'register' ? 'Aramıza katılmaya hazır mısın?' : 'Endişelenme, hallederiz.')}
+                      </p>
                       
                       {/* Connection Status Indicator for User Clarity */}
                       <div className="mt-2 text-xs">
@@ -634,33 +660,65 @@ const App: React.FC = () => {
                   </div>
 
                   <form onSubmit={handleAuthSubmit} className="space-y-4">
-                      <div>
-                          <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">Kullanıcı Adı</label>
-                          <input 
-                              type="text" 
-                              className="w-full bg-[#202225] text-white p-2.5 rounded border border-black/10 focus:border-discord-accent outline-none transition-colors"
-                              value={authUsername}
-                              onChange={e => setAuthUsername(e.target.value)}
-                              required
-                              disabled={authLoading}
-                          />
-                      </div>
-                      <div>
-                          <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">Şifre</label>
-                          <input 
-                              type="password" 
-                              className="w-full bg-[#202225] text-white p-2.5 rounded border border-black/10 focus:border-discord-accent outline-none transition-colors"
-                              value={authPassword}
-                              onChange={e => setAuthPassword(e.target.value)}
-                              required
-                              disabled={authLoading}
-                          />
-                      </div>
+                      {authMode === 'forgot' ? (
+                          <div className="animate-fadeIn">
+                             <div className="mb-4 text-center">
+                                 <p className="text-white font-medium mb-1">Şifremi unuttum, ne yapmalıyım?</p>
+                                 <p className="text-xs text-gray-400">E-posta adresini gir, sana sıfırlama bağlantısı gönderelim.</p>
+                             </div>
+                             <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">E-Posta</label>
+                             <input 
+                                  type="email" 
+                                  className="w-full bg-[#202225] text-white p-3 rounded-lg border-2 border-[#202225] focus:border-discord-accent focus:bg-[#2f3136] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
+                                  value={resetEmail}
+                                  onChange={e => setResetEmail(e.target.value)}
+                                  required
+                                  disabled={authLoading}
+                                  placeholder="ornek@email.com"
+                              />
+                          </div>
+                      ) : (
+                          <>
+                            <div>
+                                <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">Kullanıcı Adı</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full bg-[#202225] text-white p-3 rounded-lg border-2 border-[#202225] focus:border-discord-accent focus:bg-[#2f3136] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
+                                    value={authUsername}
+                                    onChange={e => setAuthUsername(e.target.value)}
+                                    required
+                                    disabled={authLoading}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">Şifre</label>
+                                <input 
+                                    type="password" 
+                                    className="w-full bg-[#202225] text-white p-3 rounded-lg border-2 border-[#202225] focus:border-discord-accent focus:bg-[#2f3136] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
+                                    value={authPassword}
+                                    onChange={e => setAuthPassword(e.target.value)}
+                                    required
+                                    disabled={authLoading}
+                                />
+                                {authMode === 'login' && (
+                                    <div className="flex justify-end mt-1">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {setAuthMode('forgot'); setAuthError("");}} 
+                                            className="text-xs text-discord-accent hover:underline"
+                                        >
+                                            Şifremi Unuttum?
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                          </>
+                      )}
                       
                       {authError && <div className="text-red-500 text-sm font-medium">{authError}</div>}
 
                       <button type="submit" disabled={authLoading} className={`bg-discord-accent w-full py-2.5 rounded text-white font-bold hover:bg-indigo-600 transition-colors ${authLoading ? 'İşleniyor...' : ''}`}>
-                          {authLoading ? 'İşleniyor...' : (authMode === 'login' ? 'Giriş Yap' : 'Kayıt Ol')}
+                          {authLoading ? 'İşleniyor...' : (authMode === 'login' ? 'Giriş Yap' : (authMode === 'register' ? 'Kayıt Ol' : 'Sıfırlama Bağlantısı Gönder'))}
                       </button>
                   </form>
 
@@ -668,7 +726,11 @@ const App: React.FC = () => {
                       {authMode === 'login' ? (
                           <>Hesabın yok mu? <button onClick={() => {setAuthMode('register'); setAuthError("");}} className="text-discord-accent hover:underline">Kaydol</button></>
                       ) : (
-                          <>Zaten hesabın var mı? <button onClick={() => {setAuthMode('login'); setAuthError("");}} className="text-discord-accent hover:underline">Giriş Yap</button></>
+                          authMode === 'register' ? (
+                              <>Zaten hesabın var mı? <button onClick={() => {setAuthMode('login'); setAuthError("");}} className="text-discord-accent hover:underline">Giriş Yap</button></>
+                          ) : (
+                             <button onClick={() => {setAuthMode('login'); setAuthError("");}} className="text-discord-accent hover:underline">Giriş ekranına dön</button>
+                          )
                       )}
                   </div>
               </div>

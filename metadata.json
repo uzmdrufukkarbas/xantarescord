@@ -1,5 +1,5 @@
 {
-  "name": "xantares-cord-",
+  "name": "xantarescord",
   "description": "Discord benzeri, 1080p ekran paylaşımı ve sesli sohbet özelliğine sahip, Gemini destekli AI arkadaş uygulaması.",
   "requestFramePermissions": [
     "microphone"

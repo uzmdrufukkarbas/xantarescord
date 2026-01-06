@@ -4,6 +4,10 @@
   "description": "Discord benzeri uygulama sunucusu",
   "main": "server.js",
   "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uzmdrufukkarbas/xantarescord.git"
+  },
   "scripts": {
     "start": "node server.js"
   },

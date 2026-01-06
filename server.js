@@ -39,11 +39,12 @@ app.get('/', (req, res) => {
 const server = http.createServer(app);
 
 // Socket.io Config with permissive CORS
+// DÜZELTME: origin: "*" ile credentials: true aynı anda kullanılamaz.
 const io = new Server(server, {
   cors: {
     origin: "*", 
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: false // Tarayıcı hatalarını önlemek için false yapıldı
   },
   transports: ['websocket', 'polling']
 });

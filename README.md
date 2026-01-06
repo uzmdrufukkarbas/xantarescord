@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# XantaresCord (Damar Odası)
 
-# Run and deploy your AI Studio app
+Discord benzeri, gerçek zamanlı sesli sohbet ve 1080p ekran paylaşımı yapabileceğiniz web tabanlı bir uygulama.
 
-This contains everything you need to run your app locally.
+Bu proje [uzmdrufukkarbas/xantarescord](https://github.com/uzmdrufukkarbas/xantarescord) deposunun kod tabanına dayanmaktadır.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1ATqAQol9jhITZx9NedPZkKtJaoifEE40
+## Özellikler
 
-## Run Locally
+- **Gerçek Zamanlı Sohbet:** Socket.io ile anlık mesajlaşma.
+- **Sesli Sohbet:** WebRTC ile düşük gecikmeli ses iletişimi.
+- **Ekran Paylaşımı:** P2P bağlantı üzerinden yüksek kaliteli ekran paylaşımı.
+- **Kanal Yönetimi:** Metin ve ses kanalları oluşturma, düzenleme ve silme.
+- **Sunucu Özelleştirme:** Sunucu adı ve ikonu değiştirme.
+- **Kalıcı Veri:** Kullanıcılar, mesajlar ve kanallar sunucu tarafında JSON dosyalarında saklanır.
 
-**Prerequisites:**  Node.js
+## Kurulum
 
+1. Repoyu klonlayın veya indirin.
+2. Bağımlılıkları yükleyin:
+   ```bash
+   npm install
+   ```
+3. Sunucuyu başlatın:
+   ```bash
+   npm start
+   ```
+4. Tarayıcınızda açın (Render gibi bir platformda deploy ettiyseniz URL'yi kullanın).
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Teknoloji Yığını
+
+- **Frontend:** React, TailwindCSS
+- **Backend:** Node.js, Express, Socket.io
+- **İletişim:** WebRTC (Ses/Video), WebSocket (Sinyalleşme/Chat)
+
+## Lisans
+
+Bu proje MIT lisansı altındadır.
