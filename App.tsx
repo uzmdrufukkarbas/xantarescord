@@ -219,7 +219,8 @@ const App: React.FC = () => {
       
       socket.on('connect_error', (err) => {
           setConnectionState(ConnectionState.ERROR);
-          setAuthError(`Sunucuya bağlanılamadı (${err.message}). Adresi kontrol edin.`);
+          // Hata mesajını daha açıklayıcı yapalım
+          setAuthError(`Sunucuya bağlanılamadı (${err.message}). Lütfen 'node server.js' komutu ile sunucunun çalıştığından emin olun.`);
           setAuthLoading(false);
       });
 
@@ -1292,4 +1293,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
