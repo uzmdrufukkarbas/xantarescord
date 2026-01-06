@@ -6,6 +6,11 @@ export interface ChatMessage {
   senderAvatar: string;
   text: string;
   timestamp: string; // JSON serileştirme için string kullanıyoruz
+  replyTo?: {
+    id: string;
+    senderName: string;
+    text: string;
+  };
 }
 
 export enum ConnectionState {
