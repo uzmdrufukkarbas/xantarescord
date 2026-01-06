@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ConnectionState, ChatMessage, VoiceUser, Channel } from './types';
 
@@ -24,9 +24,12 @@ const ServerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://
 const MessageSquareIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
 const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>;
+const ReplyIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>;
+const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
 
 type ViewMode = 'voice' | 'chat';
-const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
+// Instagram-style default avatar (Base64 SVG)
+const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2JjYmNiYyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==";
 
 const App: React.FC = () => {
   // --- Server Config ---
@@ -47,13 +50,14 @@ const App: React.FC = () => {
   const [serverIcon, setServerIcon] = useState("https://placehold.co/100x100?text=CS2");
   
   // Channels
-  const [textChannels, setTextChannels] = useState<Channel[]>([{ id: 'default-text', name: 'genel', type: 'text' }]);
+  const [textChannels, setTextChannels] = useState<Channel[]>([{ id: 'default-text', name: 'sohbet-odası', type: 'text' }]);
   const [voiceChannels, setVoiceChannels] = useState<Channel[]>([{ id: 'default-voice', name: 'Genel Sohbet', type: 'voice' }]);
   
   // Navigation State
   const [viewMode, setViewMode] = useState<ViewMode>('voice');
   const [activeTextChannelId, setActiveTextChannelId] = useState<string>('default-text');
   const [activeVoiceChannelId, setActiveVoiceChannelId] = useState<string>('default-voice');
+  const [showMemberList, setShowMemberList] = useState(true);
   
   // Data State
   const [connectionState, setConnectionState] = useState<ConnectionState>(ConnectionState.DISCONNECTED);
@@ -67,9 +71,11 @@ const App: React.FC = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [voiceChatInput, setVoiceChatInput] = useState("");
   const [isVoiceChatOpen, setIsVoiceChatOpen] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   
   // Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false);
   const [channelModal, setChannelModal] = useState<{
       isOpen: boolean;
       mode: 'create' | 'edit';
@@ -87,9 +93,14 @@ const App: React.FC = () => {
   const peersRef = useRef<Record<string, RTCPeerConnection>>({});
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
-  const remoteVideoRefs = useRef<Record<string, HTMLVideoElement>>({});
+  
+  // Important: Store remote video streams to handle 1080p screen sharing
+  const remoteVideoStreamsRef = useRef<Record<string, MediaStream>>({});
   const remoteAudioRefs = useRef<Record<string, HTMLAudioElement>>({});
   
+  // Force update hack for stream rendering
+  const [, forceUpdate] = useState({});
+
   // Media State
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
@@ -98,14 +109,13 @@ const App: React.FC = () => {
   const textChatScrollRef = useRef<HTMLDivElement>(null);
   const voiceChatScrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const userFileInputRef = useRef<HTMLInputElement>(null);
 
   // Cleanup effect
   useEffect(() => {
-    // Initial connection attempt on load if url exists
     const savedServerUrl = localStorage.getItem('custom_socket_url');
     if (savedServerUrl) {
        setServerUrl(savedServerUrl);
-       // We only connect, but don't join until auth
        connectSocket(savedServerUrl);
     } else {
        setIsServerModalOpen(true);
@@ -123,7 +133,6 @@ const App: React.FC = () => {
     const invitePayload = params.get('invite');
     if (invitePayload) {
         try {
-            // Fix for UTF-8 characters
             const decodedString = decodeURIComponent(escape(atob(invitePayload)));
             const decoded = JSON.parse(decodedString);
             setInviteData(decoded);
@@ -133,25 +142,35 @@ const App: React.FC = () => {
         }
     }
 
-    // Load Settings
     const savedIcon = localStorage.getItem('custom_server_icon');
     if (savedIcon) setServerIcon(savedIcon);
     const savedServerName = localStorage.getItem('custom_server_name');
     if (savedServerName) setServerName(savedServerName);
 
-    // Channels are loaded/synced from Invite usually, or local fallback
     const savedTextChannels = localStorage.getItem('custom_text_channels');
     if (savedTextChannels) try { setTextChannels(JSON.parse(savedTextChannels)); } catch(e){}
     const savedVoiceChannels = localStorage.getItem('custom_voice_channels');
     if (savedVoiceChannels) try { setVoiceChannels(JSON.parse(savedVoiceChannels)); } catch(e){}
   }, []);
 
-  // Save changes
   useEffect(() => { localStorage.setItem('custom_server_name', serverName); }, [serverName]);
   useEffect(() => { localStorage.setItem('custom_text_channels', JSON.stringify(textChannels)); }, [textChannels]);
   useEffect(() => { localStorage.setItem('custom_voice_channels', JSON.stringify(voiceChannels)); }, [voiceChannels]);
+
+  useEffect(() => {
+    if (textChannels.length > 0) {
+      const exists = textChannels.find(c => c.id === activeTextChannelId);
+      if (!exists) setActiveTextChannelId(textChannels[0].id);
+    }
+  }, [textChannels, activeTextChannelId]);
+
+  useEffect(() => {
+    if (voiceChannels.length > 0) {
+      const exists = voiceChannels.find(c => c.id === activeVoiceChannelId);
+      if (!exists) setActiveVoiceChannelId(voiceChannels[0].id);
+    }
+  }, [voiceChannels, activeVoiceChannelId]);
   
-  // Auto-scroll chat
   useEffect(() => {
     if (textChatScrollRef.current) textChatScrollRef.current.scrollTop = textChatScrollRef.current.scrollHeight;
   }, [textChatData, activeTextChannelId, viewMode]);
@@ -172,12 +191,9 @@ const App: React.FC = () => {
           socketRef.current.close();
       }
 
-      // Sanitize URL
       const url = urlInput.replace(/\/$/, "");
-
-      // Let Socket.io handle transports automatically (polling -> websocket) to avoid errors
       const socket = io(url, {
-          transports: ['websocket', 'polling'], // XHR Poll hatasını önlemek için eklendi
+          transports: ['websocket', 'polling'],
           reconnection: true,
           reconnectionAttempts: 5,
           timeout: 20000,
@@ -191,7 +207,6 @@ const App: React.FC = () => {
           setConnectionState(ConnectionState.CONNECTED);
           setAuthError(""); 
 
-          // AUTO-LOGIN LOGIC
           const savedUser = localStorage.getItem('saved_username');
           const savedPass = localStorage.getItem('saved_password');
           if (savedUser && savedPass) {
@@ -203,7 +218,6 @@ const App: React.FC = () => {
       });
       
       socket.on('connect_error', (err) => {
-          console.error("Connection error:", err);
           setConnectionState(ConnectionState.ERROR);
           setAuthError(`Sunucuya bağlanılamadı (${err.message}). Adresi kontrol edin.`);
           setAuthLoading(false);
@@ -245,6 +259,12 @@ const App: React.FC = () => {
 
       socket.on('user-update', (users: VoiceUser[]) => {
           setOnlineUsers(users);
+          if (socketRef.current) {
+            const me = users.find(u => u.socketId === socketRef.current?.id);
+            if (me) {
+                setCurrentUser(prev => prev ? { ...prev, ...me } : me);
+            }
+          }
       });
 
       // WebRTC Sinyalleşme
@@ -285,7 +305,6 @@ const App: React.FC = () => {
           }
           setAuthLoading(true);
           setAuthError("");
-          // Simüle edilmiş şifre sıfırlama işlemi
           setTimeout(() => {
               setAuthLoading(false);
               alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. (Simülasyon)");
@@ -300,15 +319,12 @@ const App: React.FC = () => {
           return;
       }
       
-      // Save credentials for next time (Optimistic save)
       localStorage.setItem('saved_username', authUsername);
       localStorage.setItem('saved_password', authPassword);
 
-      // Attempt reconnect if missing
       if (!socketRef.current || !socketRef.current.connected) {
            setAuthError("Sunucuya bağlı değil. Yeniden bağlanılıyor...");
            connectSocket(serverUrl);
-           // Give it a moment or just wait for user to click again after connection
            return;
       }
 
@@ -345,18 +361,23 @@ const App: React.FC = () => {
 
       peer.ontrack = (event) => {
           const stream = event.streams[0];
-          // Görüntü mü ses mi?
+          
           if (event.track.kind === 'video') {
-               // Ekran paylaşımı
-               const videoEl = document.getElementById(`video-${targetSocketId}`) as HTMLVideoElement;
-               if (videoEl) { videoEl.srcObject = stream; videoEl.play(); }
+             // Ekran paylaşımı (Video)
+             console.log(`Video stream received from ${targetSocketId}`);
+             remoteVideoStreamsRef.current[targetSocketId] = stream;
+             // Force React re-render to update the video element with new stream
+             forceUpdate({});
           } else {
-               // Ses
-               const audioEl = document.createElement('audio');
-               audioEl.srcObject = stream;
-               audioEl.autoplay = true;
-               document.body.appendChild(audioEl);
-               remoteAudioRefs.current[targetSocketId] = audioEl;
+             // Ses
+             if (!remoteAudioRefs.current[targetSocketId]) {
+                 const audioEl = document.createElement('audio');
+                 audioEl.srcObject = stream;
+                 audioEl.autoplay = true;
+                 audioEl.muted = isDeafened;
+                 document.body.appendChild(audioEl);
+                 remoteAudioRefs.current[targetSocketId] = audioEl;
+             }
           }
       };
 
@@ -378,11 +399,10 @@ const App: React.FC = () => {
       try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           localStreamRef.current = stream;
-          setIsMuted(false);
-          
+          stream.getAudioTracks().forEach(track => track.enabled = !isMuted);
+
           socketRef.current.emit('join-voice-channel', { channelId });
           
-          // O odadaki diğer herkese bağlan
           onlineUsers.forEach(u => {
               if (u.voiceChannelId === channelId && u.socketId !== socketRef.current?.id) {
                   createPeerConnection(u.socketId, true);
@@ -406,22 +426,20 @@ const App: React.FC = () => {
           setIsScreenSharing(false);
       }
       
-      // Tüm peer bağlantılarını kapat
       Object.values(peersRef.current).forEach((p: RTCPeerConnection) => p.close());
       peersRef.current = {};
+      remoteVideoStreamsRef.current = {};
       
-      // Ses elementlerini temizle
       Object.values(remoteAudioRefs.current).forEach((el: HTMLAudioElement) => el.remove());
       remoteAudioRefs.current = {};
 
       if (socketRef.current) {
           socketRef.current.emit('leave-voice-channel');
       }
-      setActiveVoiceChannelId('default-voice'); // Reset visual selection if needed
+      setActiveVoiceChannelId('default-voice');
   };
 
   const disconnect = () => {
-      // Clear auto-login credentials
       localStorage.removeItem('saved_username');
       localStorage.removeItem('saved_password');
 
@@ -444,23 +462,48 @@ const App: React.FC = () => {
        setIsScreenSharing(false);
        if (socketRef.current) socketRef.current.emit('update-status', { isStreaming: false });
        
-       alert("Ekran paylaşımı durduruldu. Değişikliklerin yansıması için kanala tekrar girin.");
+       // Re-negotiate to remove track properly or just leave/rejoin (Simpler for P2P mesh)
+       alert("Ekran paylaşımı durduruldu.");
        leaveVoiceChannel();
+       // Auto rejoin after a brief moment to reset state cleanly
+       setTimeout(() => joinVoiceChannel(activeVoiceChannelId), 500);
 
     } else {
         try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            // 1080p constraints
+            const stream = await navigator.mediaDevices.getDisplayMedia({ 
+                video: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                },
+                audio: true // System audio if available
+            });
+            
             screenStreamRef.current = stream;
             setIsScreenSharing(true);
             if (socketRef.current) socketRef.current.emit('update-status', { isStreaming: true });
 
             stream.getTracks().forEach(track => {
-                 track.onended = () => toggleScreenShare(); 
+                 track.onended = () => {
+                     // Handle browser "Stop Sharing" floating UI click
+                     if (screenStreamRef.current) {
+                         screenStreamRef.current.getTracks().forEach(t => t.stop());
+                         screenStreamRef.current = null;
+                     }
+                     setIsScreenSharing(false);
+                     if (socketRef.current) socketRef.current.emit('update-status', { isStreaming: false });
+                     leaveVoiceChannel();
+                     setTimeout(() => joinVoiceChannel(activeVoiceChannelId), 500);
+                 }; 
+                 
+                 // Add tracks to all existing peers
                  Object.values(peersRef.current).forEach((peer: RTCPeerConnection) => {
                      peer.addTrack(track, stream);
                  });
             });
             
+            // Renegotiate with all peers
             Object.keys(peersRef.current).forEach(async (socketId) => {
                  const peer = peersRef.current[socketId];
                  const offer = await peer.createOffer();
@@ -472,11 +515,34 @@ const App: React.FC = () => {
     }
   };
 
+  const toggleMute = () => {
+      const newMuted = !isMuted;
+      setIsMuted(newMuted);
+      if (localStreamRef.current) {
+          localStreamRef.current.getAudioTracks().forEach(track => track.enabled = !newMuted);
+      }
+      if (socketRef.current) {
+          socketRef.current.emit('update-status', { isMuted: newMuted });
+      }
+  };
+
+  const toggleDeafen = () => {
+      const newDeafened = !isDeafened;
+      setIsDeafened(newDeafened);
+      
+      Object.values(remoteAudioRefs.current).forEach(audio => {
+          audio.muted = newDeafened;
+      });
+
+      if (socketRef.current) {
+          socketRef.current.emit('update-status', { isDeafened: newDeafened });
+      }
+  };
+
   // --- UI Handlers ---
 
   const handleCreateInvite = () => {
      const config = { n: serverName, i: serverIcon, t: textChannels, v: voiceChannels };
-     // Fix for UTF-8 characters (Turkish)
      const jsonString = JSON.stringify(config);
      const payload = btoa(unescape(encodeURIComponent(jsonString)));
      
@@ -507,13 +573,21 @@ const App: React.FC = () => {
       senderName: currentUser?.name || 'Ben',
       senderAvatar: currentUser?.avatar || DEFAULT_AVATAR,
       text: msgText.trim(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      replyTo: replyingTo && !isVoiceChat ? {
+         id: replyingTo.id,
+         senderName: replyingTo.senderName,
+         text: replyingTo.text
+      } : undefined
     };
 
     socketRef.current.emit('send-message', { channelId: targetChannel, message: newMessage });
     
     if(isVoiceChat) setVoiceChatInput("");
-    else setInputMessage("");
+    else {
+        setInputMessage("");
+        setReplyingTo(null);
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -527,6 +601,25 @@ const App: React.FC = () => {
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUserAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.match(/^image\//)) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            if (typeof reader.result === 'string') {
+                const newAvatar = reader.result;
+                if (currentUser) {
+                    setCurrentUser({ ...currentUser, avatar: newAvatar });
+                }
+                if (socketRef.current) {
+                    socketRef.current.emit('update-profile', { avatar: newAvatar });
+                }
+            }
+        };
+        reader.readAsDataURL(file);
     }
   };
 
@@ -563,7 +656,6 @@ const App: React.FC = () => {
       connectSocket(serverUrl);
   };
 
-  // --- Channel Management ---
   const openChannelModal = (mode: 'create' | 'edit', type: 'text' | 'voice', channel?: Channel) => {
       setModalInputName(channel ? channel.name : "");
       setChannelModal({ isOpen: true, mode, type, channelId: channel?.id });
@@ -587,7 +679,6 @@ const App: React.FC = () => {
       setModalInputName("");
   };
 
-  // Render Helpers
   const currentTextChannelName = textChannels.find(c => c.id === activeTextChannelId)?.name || 'genel';
   const usersInActiveVoice = onlineUsers.filter(u => u.voiceChannelId === activeVoiceChannelId);
 
@@ -595,19 +686,10 @@ const App: React.FC = () => {
   if (isServerModalOpen) {
       return (
           <div className="flex h-screen w-screen bg-[#202225] items-center justify-center font-sans text-white relative">
-              {/* Back Button */}
-              <button 
-                  onClick={() => setIsServerModalOpen(false)}
-                  className="absolute top-6 left-6 flex items-center text-white/70 hover:text-white bg-black/50 hover:bg-black/70 px-4 py-2 rounded-lg transition-all font-medium backdrop-blur-sm"
-              >
-                  <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                  Geri Dön
-              </button>
-
               <div className="bg-[#36393f] p-8 rounded shadow-lg w-96 relative z-10">
                    <h2 className="text-2xl font-bold mb-4">Sunucu Bağlantısı</h2>
-                   <p className="text-gray-400 text-sm mb-4">Kiralanan sunucunun adresini girin (örn: http://192.168.1.1:3001)</p>
-                   <p className="text-yellow-500 text-xs mb-4">Not: Ücretsiz sunucuların uyanması 1 dakikayı bulabilir.</p>
+                   <p className="text-gray-400 text-sm mb-4">Sunucunun adresini girin.</p>
+                   
                    <input 
                       className="w-full bg-[#202225] p-2 rounded mb-4 text-white" 
                       value={serverUrl} 
@@ -620,11 +702,9 @@ const App: React.FC = () => {
       );
   }
 
-  // LOGIN SCREEN
   if (!isLoggedIn) {
       return (
-          <div className="flex h-screen w-screen bg-[url('https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center items-center justify-center font-sans relative">
-              {/* Overlay for better readability */}
+          <div className="flex h-screen w-screen bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center items-center justify-center font-sans relative">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0"></div>
 
               <button 
@@ -644,7 +724,6 @@ const App: React.FC = () => {
                           {authMode === 'login' ? 'Seni tekrar görmek çok güzel!' : (authMode === 'register' ? 'Aramıza katılmaya hazır mısın?' : 'Endişelenme, hallederiz.')}
                       </p>
                       
-                      {/* Connection Status Indicator for User Clarity */}
                       <div className="mt-2 text-xs">
                           {connectionState === ConnectionState.CONNECTED ? 
                               <span className="text-green-500">● Sunucuya Bağlı</span> : 
@@ -801,8 +880,14 @@ const App: React.FC = () => {
                     {onlineUsers.filter(u => u.voiceChannelId === channel.id).map(user => (
                         <div key={user.socketId} className="flex items-center py-1 group cursor-pointer">
                             <img src={user.avatar} className={`w-6 h-6 rounded-full border-2 ${user.isStreaming ? 'border-red-500' : 'border-gray-500'}`} />
-                            <span className={`ml-2 text-sm ${user.socketId === socketRef.current?.id ? 'text-white font-bold' : 'text-gray-400'}`}>{user.name}</span>
-                            {user.isStreaming && <span className="ml-2 text-[8px] bg-red-500 text-white px-1 rounded">YAYIN</span>}
+                            <div className="flex flex-col ml-2 overflow-hidden">
+                                <span className={`text-sm truncate ${user.socketId === socketRef.current?.id ? 'text-white font-bold' : 'text-gray-400'}`}>{user.name}</span>
+                                <div className="flex items-center space-x-1">
+                                    {user.isStreaming && <span className="text-[8px] bg-red-500 text-white px-1 rounded">YAYIN</span>}
+                                    {user.isMuted && <MicOffIcon className="w-3 h-3 text-red-500" />}
+                                    {user.isDeafened && <HeadphoneOffIcon className="w-3 h-3 text-red-500" />}
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -817,16 +902,38 @@ const App: React.FC = () => {
             <div className="text-white text-sm font-bold truncate">{currentUser?.name}</div>
             <div className="text-xs text-discord-muted text-[10px]">#{currentUser?.id?.substring(0,4)}</div>
           </div>
-          <button onClick={disconnect} className="text-red-500 hover:bg-gray-800 p-1 rounded" title="Çıkış Yap"><PhoneMissedIcon/></button>
+          <div className="flex items-center space-x-1">
+              <button onClick={toggleMute} className="text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded relative">
+                  {isMuted ? <MicOffIcon className="w-5 h-5 text-red-500" /> : <MicIcon className="w-5 h-5" />}
+                  {isMuted && <div className="absolute w-full h-[2px] bg-red-500 rotate-45 top-1/2 left-0"></div>}
+              </button>
+              <button onClick={toggleDeafen} className="text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded relative">
+                   {isDeafened ? <HeadphoneOffIcon className="w-5 h-5 text-red-500" /> : <HeadphoneIcon className="w-5 h-5" />}
+                   {isDeafened && <div className="absolute w-full h-[2px] bg-red-500 rotate-45 top-1/2 left-0"></div>}
+              </button>
+              <button onClick={() => setIsUserSettingsOpen(true)} className="text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded" title="Kullanıcı Ayarları">
+                   <SettingsIcon className="w-5 h-5" />
+              </button>
+              <button onClick={disconnect} className="text-gray-400 hover:text-red-500 hover:bg-gray-700 p-1 rounded" title="Çıkış Yap">
+                  <PhoneMissedIcon className="w-5 h-5"/>
+              </button>
+          </div>
         </div>
       </div>
 
       {/* 3. Main Stage */}
       <div className="flex-1 flex flex-col min-w-0 bg-discord-main relative">
         {/* Header */}
-        <div className="h-12 shadow-sm flex items-center px-4 border-b border-black/10 shrink-0">
-          <span className="text-discord-muted mr-2">{viewMode === 'chat' ? <HashtagIcon /> : <Volume2Icon />}</span>
-          <span className="text-white font-bold">{viewMode === 'chat' ? currentTextChannelName : (voiceChannels.find(c => c.id === activeVoiceChannelId)?.name)}</span>
+        <div className="h-12 shadow-sm flex items-center justify-between px-4 border-b border-black/10 shrink-0">
+          <div className="flex items-center">
+            <span className="text-discord-muted mr-2">{viewMode === 'chat' ? <HashtagIcon /> : <Volume2Icon />}</span>
+            <span className="text-white font-bold">{viewMode === 'chat' ? currentTextChannelName : (voiceChannels.find(c => c.id === activeVoiceChannelId)?.name)}</span>
+          </div>
+          {viewMode === 'chat' && (
+              <div className="flex items-center">
+                   <button onClick={() => setShowMemberList(!showMemberList)} className={`text-discord-muted hover:text-white ${showMemberList ? 'text-white' : ''}`} title="Üye Listesini Göster/Gizle"><UsersIcon /></button>
+              </div>
+          )}
         </div>
 
         {/* Content */}
@@ -842,11 +949,28 @@ const App: React.FC = () => {
                         {usersInActiveVoice.map(user => (
                             <div key={user.socketId} className={`relative bg-gray-800 rounded-lg overflow-hidden transition-all ${user.isStreaming ? 'w-full h-full' : 'w-48 h-48'}`}>
                                 {user.isStreaming ? (
-                                    <video id={`video-${user.socketId}`} className="w-full h-full object-contain" autoPlay playsInline />
+                                    <video 
+                                        ref={(el) => {
+                                            if (el && remoteVideoStreamsRef.current[user.socketId]) {
+                                                el.srcObject = remoteVideoStreamsRef.current[user.socketId];
+                                            } else if (el && user.socketId === socketRef.current?.id && screenStreamRef.current) {
+                                                // Own video preview
+                                                el.srcObject = screenStreamRef.current;
+                                                el.muted = true; // Always mute own video audio
+                                            }
+                                        }}
+                                        className="w-full h-full object-contain" 
+                                        autoPlay 
+                                        playsInline 
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center flex-col">
                                         <img src={user.avatar} className="w-16 h-16 rounded-full mb-2" />
                                         <span className="text-white font-bold">{user.name}</span>
+                                        <div className="flex mt-2 space-x-2">
+                                            {user.isMuted && <MicOffIcon className="text-red-500 w-4 h-4" />}
+                                            {user.isDeafened && <HeadphoneOffIcon className="text-red-500 w-4 h-4" />}
+                                        </div>
                                     </div>
                                 )}
                                 <div className="absolute bottom-2 left-2 bg-black/50 px-2 rounded text-white text-xs">{user.name}</div>
@@ -906,30 +1030,104 @@ const App: React.FC = () => {
 
             {/* CHAT VIEW */}
             <div className={`absolute inset-0 flex flex-col bg-discord-main transition-opacity duration-300 ${viewMode === 'chat' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                 <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={textChatScrollRef}>
-                    {(textChatData[activeTextChannelId] || []).map((msg, i) => (
-                        <div key={i} className="group flex hover:bg-[#32353b] -mx-4 px-4 py-1">
-                           <img src={msg.senderAvatar || DEFAULT_AVATAR} className="w-10 h-10 rounded-full mr-4 mt-0.5" />
-                           <div className="flex-1">
-                               <div className="flex items-center space-x-2">
-                                  <span className="font-medium text-white hover:underline cursor-pointer">{msg.senderName}</span>
-                                  <span className="text-xs text-discord-muted">{new Date(msg.timestamp).toLocaleString()}</span>
-                               </div>
-                               <p className="text-discord-text">{msg.text}</p>
-                           </div>
+                 <div className="flex-1 flex overflow-hidden">
+                    {/* Main Chat Area */}
+                    <div className="flex-1 flex flex-col min-w-0">
+                         <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={textChatScrollRef}>
+                            {(textChatData[activeTextChannelId] || []).map((msg, i) => (
+                                <div key={i} className="group relative">
+                                   {/* Reply Preview */}
+                                   {msg.replyTo && (
+                                     <div className="flex items-center mb-1 text-xs text-gray-400 opacity-60 ml-14">
+                                        <div className="w-8 border-t-2 border-l-2 border-gray-500 h-3 rounded-tl-md -ml-6 mr-2 mt-2"></div>
+                                        <span className="font-bold mr-1">@{msg.replyTo.senderName}</span>
+                                        <span className="truncate max-w-xs">{msg.replyTo.text}</span>
+                                     </div>
+                                   )}
+
+                                   <div className="flex hover:bg-[#32353b] -mx-4 px-4 py-1 relative">
+                                     {/* Reply Action Button */}
+                                     <div className="absolute right-4 top-2 hidden group-hover:flex bg-[#36393f] rounded shadow-sm border border-black/20 z-10">
+                                       <button 
+                                         onClick={() => setReplyingTo(msg)}
+                                         className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors" 
+                                         title="Yanıtla"
+                                       >
+                                         <ReplyIcon className="w-4 h-4" />
+                                       </button>
+                                     </div>
+
+                                     <img src={msg.senderAvatar || DEFAULT_AVATAR} className="w-10 h-10 rounded-full mr-4 mt-0.5" />
+                                     <div className="flex-1 min-w-0">
+                                         <div className="flex items-center space-x-2">
+                                            <span className="font-medium text-white hover:underline cursor-pointer">{msg.senderName}</span>
+                                            <span className="text-xs text-discord-muted">{new Date(msg.timestamp).toLocaleString()}</span>
+                                         </div>
+                                         <p className="text-discord-text break-words">{msg.text}</p>
+                                     </div>
+                                   </div>
+                                </div>
+                            ))}
+                         </div>
+                         
+                         <div className="px-4 pb-4 pt-2 bg-discord-main">
+                            {replyingTo && (
+                              <div className="bg-[#2f3136] px-4 py-2 flex items-center justify-between border-t border-l border-r border-gray-700 rounded-t-lg">
+                                <span className="text-gray-400 text-sm flex items-center">
+                                   <span className="mr-2 text-discord-text text-xs">Yanıtlanıyor:</span>
+                                   <span className="font-bold text-gray-300 mr-1">@{replyingTo.senderName}</span>
+                                   <span className="truncate max-w-xs text-gray-500 text-xs italic opacity-70">
+                                     {replyingTo.text}
+                                   </span>
+                                </span>
+                                <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700">
+                                  <CloseIcon className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )}
+                            <form onSubmit={(e) => handleTextSubmit(e, false)} className={`relative flex items-center bg-discord-chat ${replyingTo ? 'rounded-b-lg' : 'rounded-lg'}`}>
+                               <button type="button" className="absolute left-4 text-discord-muted hover:text-white cursor-pointer"><PlusIcon /></button>
+                               <input 
+                                 value={inputMessage}
+                                 onChange={(e) => setInputMessage(e.target.value)}
+                                 placeholder={`#${currentTextChannelName} kanalına mesaj gönder`}
+                                 className="w-full bg-transparent text-discord-text pl-12 pr-10 py-3 outline-none focus:ring-0 font-medium"
+                               />
+                               <button type="submit" className="absolute right-3 text-discord-muted hover:text-white p-1">
+                                  <SendIcon />
+                               </button>
+                            </form>
+                         </div>
+                    </div>
+
+                    {/* Member List Sidebar */}
+                    {showMemberList && (
+                        <div className="w-60 bg-[#2f3136] flex flex-col overflow-y-auto border-l border-black/20 shrink-0">
+                             <div className="p-4">
+                                 <h3 className="uppercase text-xs font-bold text-discord-muted mb-2">Çevrimiçi — {onlineUsers.length}</h3>
+                                 <div className="space-y-2">
+                                     {onlineUsers.map(user => (
+                                         <div key={user.socketId} className="flex items-center px-2 py-2 hover:bg-discord-hover rounded cursor-pointer opacity-90 hover:opacity-100 group">
+                                             <div className="relative">
+                                                 <img src={user.avatar} className="w-8 h-8 rounded-full bg-discord-dark" />
+                                                 <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#2f3136] ${user.voiceChannelId ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                                             </div>
+                                             <div className="ml-3 flex-1 min-w-0">
+                                                 <div className="text-white font-medium text-sm truncate">{user.name}</div>
+                                                 {user.voiceChannelId && (
+                                                     <div className="flex items-center space-x-1 mt-0.5">
+                                                         {user.isStreaming && <span className="text-[9px] bg-red-500 text-white px-1 rounded font-bold uppercase tracking-wider">CANLI</span>}
+                                                         {user.isMuted && <MicOffIcon className="w-3 h-3 text-red-500" />}
+                                                         {user.isDeafened && <HeadphoneOffIcon className="w-3 h-3 text-red-500" />}
+                                                     </div>
+                                                 )}
+                                             </div>
+                                         </div>
+                                     ))}
+                                 </div>
+                             </div>
                         </div>
-                    ))}
-                 </div>
-                 <div className="p-4 bg-discord-main">
-                    <form onSubmit={(e) => handleTextSubmit(e, false)} className="relative">
-                       <div className="absolute left-4 top-3 text-discord-muted hover:text-white cursor-pointer"><PlusIcon /></div>
-                       <input 
-                         value={inputMessage}
-                         onChange={(e) => setInputMessage(e.target.value)}
-                         placeholder={`#${currentTextChannelName} kanalına mesaj gönder`}
-                         className="w-full bg-discord-chat text-discord-text px-12 py-3 rounded-lg outline-none focus:ring-0 font-medium"
-                       />
-                    </form>
+                    )}
                  </div>
             </div>
         </div>
@@ -978,6 +1176,45 @@ const App: React.FC = () => {
               
               <div className="bg-[#2f3136] p-4 flex justify-end">
                  <button onClick={() => setIsSettingsOpen(false)} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium text-sm transition-colors">Tamam</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* USER SETTINGS MODAL */}
+      {isUserSettingsOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center animate-fadeIn">
+           <div className="bg-[#36393f] w-[440px] rounded-lg shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100">
+              <div className="p-6">
+                 <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-white">Kullanıcı Ayarları</h2>
+                    <button onClick={() => setIsUserSettingsOpen(false)} className="text-discord-muted hover:text-discord-text transition-colors"><CloseIcon /></button>
+                 </div>
+                 
+                 <div className="space-y-6">
+                    <div className="flex flex-col items-center space-y-4">
+                        <div className="w-24 h-24 rounded-full overflow-hidden shadow-lg border-2 border-discord-dark relative group cursor-pointer" onClick={() => userFileInputRef.current?.click()}>
+                           <img src={currentUser?.avatar || DEFAULT_AVATAR} alt="User Avatar" className="w-full h-full object-cover" />
+                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              <span className="text-xs font-bold text-white">Değiştir</span>
+                           </div>
+                        </div>
+                        <h3 className="text-xl font-bold text-white">{currentUser?.name}</h3>
+                        <p className="text-discord-muted text-sm">#{currentUser?.id?.substring(0,4)}</p>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <input type="file" ref={userFileInputRef} className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleUserAvatarUpload} />
+                        <button onClick={() => userFileInputRef.current?.click()} className="bg-discord-accent hover:bg-indigo-500 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center transition-colors">
+                           <span className="mr-2"><UploadIcon /></span>
+                           Avatar Değiştir
+                        </button>
+                    </div>
+                 </div>
+              </div>
+              
+              <div className="bg-[#2f3136] p-4 flex justify-end">
+                 <button onClick={() => setIsUserSettingsOpen(false)} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium text-sm transition-colors">Tamam</button>
               </div>
            </div>
         </div>
@@ -1055,3 +1292,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
