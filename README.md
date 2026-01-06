@@ -34,4 +34,4 @@ Bu proje [uzmdrufukkarbas/xantarescord](https://github.com/uzmdrufukkarbas/xanta
 
 ## Lisans
 
-Bu proje MIT lisansı altındadır.
+Bu proje MIT lisansı altındadır
