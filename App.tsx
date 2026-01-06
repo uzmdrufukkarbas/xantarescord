@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ConnectionState, ChatMessage, VoiceUser, Channel } from './types';
@@ -21,6 +22,7 @@ const TrashIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://w
 const InviteIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>;
 const ServerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>;
 const MessageSquareIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
+const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
 
 type ViewMode = 'voice' | 'chat';
 const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
@@ -576,6 +578,7 @@ const App: React.FC = () => {
               <div className="bg-[#36393f] p-8 rounded shadow-lg w-96">
                    <h2 className="text-2xl font-bold mb-4">Sunucu Bağlantısı</h2>
                    <p className="text-gray-400 text-sm mb-4">Kiralanan sunucunun adresini girin (örn: http://192.168.1.1:3001)</p>
+                   <p className="text-yellow-500 text-xs mb-4">Not: Ücretsiz sunucuların uyanması 1 dakikayı bulabilir.</p>
                    <input 
                       className="w-full bg-[#202225] p-2 rounded mb-4 text-white" 
                       value={serverUrl} 
@@ -591,8 +594,17 @@ const App: React.FC = () => {
   // LOGIN SCREEN
   if (!isLoggedIn) {
       return (
-          <div className="flex h-screen w-screen bg-[url('https://cdn.discordapp.com/attachments/1079509378393587783/1085605790403448902/discord_background.png')] bg-cover items-center justify-center font-sans">
-              <div className="bg-[#36393f] p-8 rounded shadow-2xl w-full max-w-sm">
+          <div className="flex h-screen w-screen bg-[url('https://cdn.discordapp.com/attachments/1079509378393587783/1085605790403448902/discord_background.png')] bg-cover items-center justify-center font-sans relative">
+              
+              <button 
+                  onClick={() => setIsServerModalOpen(true)}
+                  className="absolute top-6 left-6 flex items-center text-white/70 hover:text-white bg-black/50 hover:bg-black/70 px-4 py-2 rounded-lg transition-all font-medium backdrop-blur-sm"
+              >
+                  <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                  Sunucu Değiştir
+              </button>
+
+              <div className="bg-[#36393f] p-8 rounded shadow-2xl w-full max-w-sm relative z-10">
                   <div className="text-center mb-6">
                       <h2 className="text-2xl font-bold text-white mb-2">{authMode === 'login' ? 'Tekrar Hoş Geldin!' : 'Hesap Oluştur'}</h2>
                       <p className="text-gray-400 text-sm">{authMode === 'login' ? 'Seni tekrar görmek çok güzel!' : 'Aramıza katılmaya hazır mısın?'}</p>
@@ -602,7 +614,7 @@ const App: React.FC = () => {
                           {connectionState === ConnectionState.CONNECTED ? 
                               <span className="text-green-500">● Sunucuya Bağlı</span> : 
                               (connectionState === ConnectionState.CONNECTING ? 
-                                  <span className="text-yellow-500">● Sunucuya Bağlanıyor...</span> : 
+                                  <span className="text-yellow-500">● Sunucuya Bağlanıyor... (Uyku modundaysa 50sn sürebilir)</span> : 
                                   <span className="text-red-500">● Sunucu Bağlantısı Yok ({serverUrl})</span>
                               )
                           }

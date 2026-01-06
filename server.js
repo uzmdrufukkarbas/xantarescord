@@ -1,4 +1,15 @@
 
+// --- HATA YAKALAMA (DEBUG) ---
+process.on('uncaughtException', (err) => {
+    console.error('KRITIK HATA (Uncaught Exception):', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('YAKALANAMAYAN PROMISE HATASI:', reason);
+});
+
+console.log("Sunucu scripti başlatılıyor...");
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -9,6 +20,22 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
+// Render.com health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Ana sayfa için bilgilendirme mesajı
+app.get('/', (req, res) => {
+    res.send(`
+        <div style="font-family: sans-serif; text-align: center; padding-top: 50px;">
+            <h1 style="color: #5865F2;">Damar Odası Sunucusu Aktif! 🚀</h1>
+            <p>Bu sunucu şu anda çalışıyor.</p>
+            <p>Uygulamanızdaki <b>"Sunucu Değiştir"</b> ekranına gidip bu sayfanın linkini yapıştırın.</p>
+        </div>
+    `);
+});
+
 const server = http.createServer(app);
 
 // Socket.io Config with permissive CORS
@@ -18,16 +45,21 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true
   },
-  transports: ['websocket', 'polling'] // Explicitly allow both
+  transports: ['websocket', 'polling']
 });
 
 // --- Veritabanı Yolları ---
 const MESSAGES_DB_PATH = path.join(__dirname, 'messages.json');
 const USERS_DB_PATH = path.join(__dirname, 'users.json');
 
-// Dosyalar yoksa oluştur
-if (!fs.existsSync(MESSAGES_DB_PATH)) fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify({}));
-if (!fs.existsSync(USERS_DB_PATH)) fs.writeFileSync(USERS_DB_PATH, JSON.stringify([]));
+// Dosyalar yoksa oluştur (Hata korumalı)
+try {
+    if (!fs.existsSync(MESSAGES_DB_PATH)) fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify({}));
+    if (!fs.existsSync(USERS_DB_PATH)) fs.writeFileSync(USERS_DB_PATH, JSON.stringify([]));
+    console.log("Veritabanı dosyaları kontrol edildi/oluşturuldu.");
+} catch (err) {
+    console.error("Veritabanı dosyası oluşturma hatası:", err);
+}
 
 // --- Yardımcı Fonksiyonlar ---
 function loadMessages() {
@@ -35,11 +67,15 @@ function loadMessages() {
 }
 
 function saveMessage(channelId, message) {
-    const db = loadMessages();
-    if (!db[channelId]) db[channelId] = [];
-    db[channelId].push(message);
-    if (db[channelId].length > 100) db[channelId] = db[channelId].slice(-100);
-    fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify(db, null, 2));
+    try {
+        const db = loadMessages();
+        if (!db[channelId]) db[channelId] = [];
+        db[channelId].push(message);
+        if (db[channelId].length > 100) db[channelId] = db[channelId].slice(-100);
+        fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify(db, null, 2));
+    } catch (e) {
+        console.error("Mesaj kaydetme hatası:", e);
+    }
 }
 
 function loadUsers() {
@@ -47,9 +83,13 @@ function loadUsers() {
 }
 
 function saveUser(user) {
-    const users = loadUsers();
-    users.push(user);
-    fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
+    try {
+        const users = loadUsers();
+        users.push(user);
+        fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
+    } catch (e) {
+        console.error("Kullanıcı kaydetme hatası:", e);
+    }
 }
 
 function findUser(username) {
@@ -76,7 +116,7 @@ io.on('connection', (socket) => {
           const newUser = {
               id: 'user-' + Date.now(),
               username,
-              password, // Not: Gerçek projede şifreler hashlenmelidir!
+              password, 
               avatar: defaultAvatar
           };
           saveUser(newUser);
@@ -103,7 +143,6 @@ io.on('connection', (socket) => {
 
   // --- UYGULAMA İÇİ İŞLEMLER ---
 
-  // 1. Kullanıcı Giriş Yaptıktan Sonra Sunucuya Katılma
   socket.on('join-server', (userData) => {
       connectedUsers[socket.id] = {
           ...userData,
@@ -114,15 +153,12 @@ io.on('connection', (socket) => {
           voiceChannelId: null
       };
       
-      // Geçmiş mesajları gönder
       const db = loadMessages();
       socket.emit('chat-history', db);
       
-      // Diğerlerine bildir
       io.emit('user-update', Object.values(connectedUsers));
   });
 
-  // 2. Ses Kanalına Girme
   socket.on('join-voice-channel', ({ channelId }) => {
       if (connectedUsers[socket.id]) {
           connectedUsers[socket.id].voiceChannelId = channelId;
@@ -139,13 +175,11 @@ io.on('connection', (socket) => {
       }
   });
 
-  // 3. Mesajlaşma
   socket.on('send-message', ({ channelId, message }) => {
       saveMessage(channelId, message);
       io.emit('new-message', { channelId, message });
   });
 
-  // 4. WebRTC Sinyalleşme
   socket.on('signal', (data) => {
       io.to(data.target).emit('signal', {
           signal: data.signal,
@@ -153,7 +187,6 @@ io.on('connection', (socket) => {
       });
   });
 
-  // 5. Durum Güncellemeleri
   socket.on('update-status', (status) => {
       if (connectedUsers[socket.id]) {
           connectedUsers[socket.id] = { ...connectedUsers[socket.id], ...status };
