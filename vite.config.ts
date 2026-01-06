@@ -5,9 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    proxy: {
-      // API isteklerini backend'e yönlendir
-      '/socket.io': {
-        target: 'http://localhost:3001',
-        ws: true,
-        changeOrigin: true
+    // Proxy ayarları kaldırıldı.
+    // App.tsx doğrudan 'http://localhost:3001' adresine bağlandığı 
+    // ve server.js CORS ayarlarını yönettiği için proxy'ye gerek yoktur.
+  }
+})
