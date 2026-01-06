@@ -574,8 +574,17 @@ const App: React.FC = () => {
   // --- JSX ---
   if (isServerModalOpen) {
       return (
-          <div className="flex h-screen w-screen bg-[#202225] items-center justify-center font-sans text-white">
-              <div className="bg-[#36393f] p-8 rounded shadow-lg w-96">
+          <div className="flex h-screen w-screen bg-[#202225] items-center justify-center font-sans text-white relative">
+              {/* Back Button */}
+              <button 
+                  onClick={() => setIsServerModalOpen(false)}
+                  className="absolute top-6 left-6 flex items-center text-white/70 hover:text-white bg-black/50 hover:bg-black/70 px-4 py-2 rounded-lg transition-all font-medium backdrop-blur-sm"
+              >
+                  <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                  Geri Dön
+              </button>
+
+              <div className="bg-[#36393f] p-8 rounded shadow-lg w-96 relative z-10">
                    <h2 className="text-2xl font-bold mb-4">Sunucu Bağlantısı</h2>
                    <p className="text-gray-400 text-sm mb-4">Kiralanan sunucunun adresini girin (örn: http://192.168.1.1:3001)</p>
                    <p className="text-yellow-500 text-xs mb-4">Not: Ücretsiz sunucuların uyanması 1 dakikayı bulabilir.</p>
