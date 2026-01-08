@@ -15,16 +15,16 @@
           extend: {
             colors: {
               discord: {
-                dark: '#202225',
-                sidebar: '#2f3136',
-                main: '#36393f',
-                chat: '#40444b',
-                hover: '#393c43',
+                dark: '#1e1f22',      /* Sidebar icon bar */
+                sidebar: '#2b2d31',   /* Channel list & User panel */
+                main: '#313338',      /* Chat area / Main stage */
+                chat: '#383a40',      /* Input area */
+                hover: '#3f4147',
                 active: '#3ba55c',
                 accent: '#5865F2',
-                red: '#ed4245',
-                text: '#dcddde',
-                muted: '#72767d'
+                red: '#da373c',
+                text: '#dbdee1',
+                muted: '#949ba4'
               }
             }
           }
@@ -33,8 +33,8 @@
     </script>
     <style>
       body {
-        background-color: #202225;
-        color: #dcddde;
+        background-color: #1e1f22;
+        color: #dbdee1;
         overflow: hidden;
       }
       /* Custom scrollbar */
@@ -43,10 +43,10 @@
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background-color: #2f3136;
+        background-color: #2b2d31;
       }
       ::-webkit-scrollbar-thumb {
-        background-color: #202225;
+        background-color: #1a1b1e;
         border-radius: 4px;
       }
     </style>
@@ -59,7 +59,8 @@
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
     "vite": "https://esm.sh/vite@^7.3.0",
-    "socket.io-client": "https://esm.sh/socket.io-client@^4.8.3"
+    "socket.io-client": "https://esm.sh/socket.io-client@^4.8.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
   }
 }
 </script>
