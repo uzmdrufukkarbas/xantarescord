@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ConnectionState, ChatMessage, VoiceUser, Channel } from './types';
 
@@ -12,7 +12,8 @@ const ScreenShareIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="ht
 const PhoneIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>;
 const PhoneMissedIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="23" y1="1" x2="17" y2="7"></line><line x1="17" y1="1" x2="23" y2="7"></line><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>;
 const Volume2Icon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>;
-const SettingsIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>;
+const VolumeXIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>;
+const SettingsIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>;
 const CloseIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 const UploadIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>;
 const HashtagIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>;
@@ -23,9 +24,17 @@ const InviteIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://
 const ServerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>;
 const MessageSquareIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
 const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
-const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>;
 const ReplyIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>;
 const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+const MaximizeIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>;
+const EyeOffIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>;
+const EyeIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
+const LogOutIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
+const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>;
+const HammerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"></path><path d="M17.64 15 22 10.64"></path><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V3.6a2.4 2.4 0 0 0-2.4-2.4h-.3c-.84 0-1.65.33-2.25.93L12.53 3.39a3.2 3.2 0 0 0-.93 2.25v4.92c0 .85.33 1.66.93 2.26l1.25 1.25"></path></svg>;
+const GiftIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>;
+const StickerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M10 18a4 4 0 1 1 0-8 4 4 0 0 1 0 8"></path></svg>;
+const SmileIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>;
 
 type ViewMode = 'voice' | 'chat';
 // Instagram-style default avatar (Base64 SVG)
@@ -70,7 +79,9 @@ const App: React.FC = () => {
   // Input State
   const [inputMessage, setInputMessage] = useState("");
   const [voiceChatInput, setVoiceChatInput] = useState("");
-  const [isVoiceChatOpen, setIsVoiceChatOpen] = useState(false);
+  
+  // Open Voice Chat Panel
+  const [openVoiceChatId, setOpenVoiceChatId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   
   // Modal State
@@ -87,6 +98,14 @@ const App: React.FC = () => {
 
   // Invite Modal State
   const [inviteData, setInviteData] = useState<any>(null);
+  
+  // Controls Visibility State
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Local Media Control State (Mute/Hide others locally)
+  const [locallyMutedUsers, setLocallyMutedUsers] = useState<Set<string>>(new Set());
+  const [locallyHiddenVideos, setLocallyHiddenVideos] = useState<Set<string>>(new Set());
 
   // Refs for WebRTC & Socket
   const socketRef = useRef<Socket | null>(null);
@@ -118,7 +137,8 @@ const App: React.FC = () => {
        setServerUrl(savedServerUrl);
        connectSocket(savedServerUrl);
     } else {
-       setIsServerModalOpen(true);
+       // Default connect if no saved URL
+       connectSocket("http://localhost:3001");
     }
 
     return () => {
@@ -176,10 +196,59 @@ const App: React.FC = () => {
   }, [textChatData, activeTextChannelId, viewMode]);
 
   useEffect(() => {
-      if (voiceChatScrollRef.current && isVoiceChatOpen) {
+      // Changed: Dependency is now openVoiceChatId instead of isVoiceChatOpen
+      if (voiceChatScrollRef.current && openVoiceChatId) {
           voiceChatScrollRef.current.scrollTop = voiceChatScrollRef.current.scrollHeight;
       }
-  }, [textChatData, activeVoiceChannelId, isVoiceChatOpen]);
+  }, [textChatData, openVoiceChatId]);
+
+  // --- UI Controls Visibility Handler ---
+  const handleMouseMove = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+    }, 5000); // 5 seconds of inactivity
+  };
+  
+  useEffect(() => {
+      return () => {
+          if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      }
+  }, []);
+
+  const getDisplayId = (user: { name: string; id: string } | null) => {
+      if (!user) return "#0000";
+      if (user.name === "Onee") return "#0";
+      if (user.name === "Vroft") return "#1";
+      if (user.name === "XANTARES") return "#2";
+      return `#${user.id.substring(0, 4)}`;
+  };
+
+  // Helper to format date for chat history
+  const formatDateDivider = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Bugün";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Dün";
+    } else {
+      return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+  };
+
+  // Helper to check if message can be deleted (within 5 minutes)
+  const canDeleteMessage = (timestamp: string) => {
+      const msgTime = new Date(timestamp).getTime();
+      const now = Date.now();
+      return (now - msgTime) < 300000; // 5 minutes in milliseconds
+  };
 
   // --- Socket & WebRTC Logic ---
 
@@ -232,6 +301,7 @@ const App: React.FC = () => {
               id: user.id,
               name: user.name,
               avatar: user.avatar || DEFAULT_AVATAR,
+              isAdmin: user.isAdmin, // Set admin status
               isMuted: false,
               isDeafened: false,
               isStreaming: false,
@@ -244,6 +314,11 @@ const App: React.FC = () => {
       socket.on('auth-error', (msg: string) => {
           setAuthLoading(false);
           setAuthError(msg);
+          // If already logged in and receive error (e.g. banned while online)
+          if(isLoggedIn) {
+             alert(msg);
+             disconnect();
+          }
       });
 
       socket.on('chat-history', (history) => {
@@ -255,6 +330,19 @@ const App: React.FC = () => {
               ...prev,
               [channelId]: [...(prev[channelId] || []), message]
           }));
+      });
+
+      socket.on('message-deleted', ({ channelId, messageId, updatedMessage }) => {
+          setTextChatData(prev => {
+              const channelMessages = prev[channelId] || [];
+              const updatedMessages = channelMessages.map(msg => 
+                  msg.id === messageId ? updatedMessage : msg
+              );
+              return {
+                  ...prev,
+                  [channelId]: updatedMessages
+              };
+          });
       });
 
       socket.on('user-update', (users: VoiceUser[]) => {
@@ -319,8 +407,12 @@ const App: React.FC = () => {
           return;
       }
       
-      localStorage.setItem('saved_username', authUsername);
-      localStorage.setItem('saved_password', authPassword);
+      // Boşlukları temizle (Sorunun çözümü)
+      const cleanUsername = authUsername.trim();
+      const cleanPassword = authPassword.trim();
+      
+      localStorage.setItem('saved_username', cleanUsername);
+      localStorage.setItem('saved_password', cleanPassword);
 
       if (!socketRef.current || !socketRef.current.connected) {
            setAuthError("Sunucuya bağlı değil. Yeniden bağlanılıyor...");
@@ -332,9 +424,9 @@ const App: React.FC = () => {
       setAuthError("");
 
       if (authMode === 'register') {
-          socketRef.current.emit('auth-register', { username: authUsername, password: authPassword });
+          socketRef.current.emit('auth-register', { username: cleanUsername, password: cleanPassword });
       } else {
-          socketRef.current.emit('auth-login', { username: authUsername, password: authPassword });
+          socketRef.current.emit('auth-login', { username: cleanUsername, password: cleanPassword });
       }
   };
 
@@ -374,7 +466,11 @@ const App: React.FC = () => {
                  const audioEl = document.createElement('audio');
                  audioEl.srcObject = stream;
                  audioEl.autoplay = true;
-                 audioEl.muted = isDeafened;
+                 
+                 // Apply current deafened state and local mute state
+                 const isLocallyMuted = locallyMutedUsers.has(targetSocketId);
+                 audioEl.muted = isDeafened || isLocallyMuted;
+
                  document.body.appendChild(audioEl);
                  remoteAudioRefs.current[targetSocketId] = audioEl;
              }
@@ -432,6 +528,9 @@ const App: React.FC = () => {
       
       Object.values(remoteAudioRefs.current).forEach((el: HTMLAudioElement) => el.remove());
       remoteAudioRefs.current = {};
+      
+      setLocallyHiddenVideos(new Set());
+      setLocallyMutedUsers(new Set());
 
       if (socketRef.current) {
           socketRef.current.emit('leave-voice-channel');
@@ -440,8 +539,9 @@ const App: React.FC = () => {
   };
 
   const disconnect = () => {
-      localStorage.removeItem('saved_username');
-      localStorage.removeItem('saved_password');
+      // FIX: Do not clear localStorage here, only on explicit logout
+      // localStorage.removeItem('saved_username');
+      // localStorage.removeItem('saved_password');
 
       leaveVoiceChannel();
       if (socketRef.current) {
@@ -518,9 +618,14 @@ const App: React.FC = () => {
   const toggleMute = () => {
       const newMuted = !isMuted;
       setIsMuted(newMuted);
+      
+      // Update local mic tracks
       if (localStreamRef.current) {
-          localStreamRef.current.getAudioTracks().forEach(track => track.enabled = !newMuted);
+          localStreamRef.current.getAudioTracks().forEach(track => {
+              track.enabled = !newMuted;
+          });
       }
+      
       if (socketRef.current) {
           socketRef.current.emit('update-status', { isMuted: newMuted });
       }
@@ -530,16 +635,71 @@ const App: React.FC = () => {
       const newDeafened = !isDeafened;
       setIsDeafened(newDeafened);
       
-      Object.values(remoteAudioRefs.current).forEach(audio => {
-          audio.muted = newDeafened;
+      // 1. Mute/Unmute incoming remote audio
+      Object.values(remoteAudioRefs.current).forEach((audio: HTMLAudioElement, index) => {
+          const socketId = Object.keys(remoteAudioRefs.current)[index];
+          const isLocallyMuted = locallyMutedUsers.has(socketId);
+          // If globally deafened OR locally muted, stay muted.
+          audio.muted = newDeafened || isLocallyMuted;
       });
 
+      // 2. Mute/Unmute outgoing microphone (as requested: "my voice too")
+      if (localStreamRef.current) {
+          localStreamRef.current.getAudioTracks().forEach(track => {
+              // Mic is enabled only if NOT deafened AND NOT muted
+              track.enabled = !newDeafened && !isMuted;
+          });
+      }
+
+      // 3. Update server status
       if (socketRef.current) {
           socketRef.current.emit('update-status', { isDeafened: newDeafened });
       }
   };
 
+  const toggleRemoteAudioLocal = (targetSocketId: string) => {
+     const newSet = new Set(locallyMutedUsers);
+     if (newSet.has(targetSocketId)) {
+         newSet.delete(targetSocketId);
+     } else {
+         newSet.add(targetSocketId);
+     }
+     setLocallyMutedUsers(newSet);
+
+     // Apply immediately to audio element
+     const audioEl = remoteAudioRefs.current[targetSocketId];
+     if (audioEl) {
+         // Muted if global deafen is on OR locally muted
+         audioEl.muted = isDeafened || newSet.has(targetSocketId);
+     }
+  };
+
+  const toggleRemoteVideoLocal = (targetSocketId: string) => {
+      const newSet = new Set(locallyHiddenVideos);
+      if (newSet.has(targetSocketId)) {
+          newSet.delete(targetSocketId);
+      } else {
+          newSet.add(targetSocketId);
+      }
+      setLocallyHiddenVideos(newSet);
+      forceUpdate({});
+  };
+
   // --- UI Handlers ---
+  const handleBanUser = (userId: string, userName: string) => {
+      if(!window.confirm(`${userName} kullanıcısını sunucudan kalıcı olarak banlamak istediğine emin misin?`)) return;
+      if (socketRef.current) {
+          socketRef.current.emit('admin-ban-user', { targetUserId: userId });
+      }
+  };
+
+  const handleDeleteMessage = (channelId: string, messageId: string) => {
+      if(window.confirm('Bu mesajı silmek istediğine emin misin?')) {
+          if (socketRef.current) {
+              socketRef.current.emit('delete-message', { channelId, messageId });
+          }
+      }
+  };
 
   const handleCreateInvite = () => {
      const config = { n: serverName, i: serverIcon, t: textChannels, v: voiceChannels };
@@ -560,16 +720,26 @@ const App: React.FC = () => {
       setInviteData(null);
   };
 
+  const handleLogout = () => {
+      // Clear persistence only on manual logout
+      localStorage.removeItem('saved_username');
+      localStorage.removeItem('saved_password');
+      disconnect();
+      setIsSettingsOpen(false);
+  };
+
   const handleTextSubmit = (e: React.FormEvent, isVoiceChat: boolean = false) => {
     e.preventDefault();
     const msgText = isVoiceChat ? voiceChatInput : inputMessage;
-    const targetChannel = isVoiceChat ? activeVoiceChannelId : activeTextChannelId;
+    // NOTE: Send to the open voice chat ID if in voice chat mode, not just activeVoiceChannelId
+    const targetChannel = isVoiceChat ? (openVoiceChatId || activeVoiceChannelId) : activeTextChannelId;
     
     if (!msgText.trim() || !socketRef.current) return;
 
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: socketRef.current.id || 'me',
+      senderId: currentUser?.id, // Send persistent ID for ownership checks
       senderName: currentUser?.name || 'Ben',
       senderAvatar: currentUser?.avatar || DEFAULT_AVATAR,
       text: msgText.trim(),
@@ -681,17 +851,31 @@ const App: React.FC = () => {
 
   const currentTextChannelName = textChannels.find(c => c.id === activeTextChannelId)?.name || 'genel';
   const usersInActiveVoice = onlineUsers.filter(u => u.voiceChannelId === activeVoiceChannelId);
+  const activeStreamer = usersInActiveVoice.find(u => u.isStreaming);
+
+  const getStatusUI = () => {
+     switch(connectionState) {
+         case ConnectionState.CONNECTED:
+             return { color: 'bg-green-500', text: 'Sohbete Bağlandın', glow: 'shadow-[0_0_10px_rgba(34,197,94,0.6)]', textColor: 'text-green-400' };
+         case ConnectionState.CONNECTING:
+             return { color: 'bg-yellow-500', text: 'Sohbete Bağlanıyor', glow: 'animate-pulse', textColor: 'text-yellow-400' };
+         default:
+             return { color: 'bg-red-500', text: 'Sohbetle Bağlantın Kesildi', glow: '', textColor: 'text-red-400' };
+     }
+  };
+  const statusUI = getStatusUI();
 
   // --- JSX ---
   if (isServerModalOpen) {
       return (
-          <div className="flex h-screen w-screen bg-[#202225] items-center justify-center font-sans text-white relative">
-              <div className="bg-[#36393f] p-8 rounded shadow-lg w-96 relative z-10">
+          <div className="flex h-screen w-screen bg-[#202225] items-center justify-center font-sans text-white relative flex-col">
+              <h1 className="text-6xl font-black text-discord-accent mb-12 tracking-widest drop-shadow-2xl select-none">XANTARESCORD</h1>
+              <div className="bg-[#313338] p-8 rounded shadow-lg w-96 relative z-10">
                    <h2 className="text-2xl font-bold mb-4">Sunucu Bağlantısı</h2>
                    <p className="text-gray-400 text-sm mb-4">Sunucunun adresini girin.</p>
                    
                    <input 
-                      className="w-full bg-[#202225] p-2 rounded mb-4 text-white" 
+                      className="w-full bg-[#1e1f22] p-2 rounded mb-4 text-white" 
                       value={serverUrl} 
                       onChange={e => setServerUrl(e.target.value)} 
                       placeholder="http://localhost:3001"
@@ -715,7 +899,7 @@ const App: React.FC = () => {
                   Sunucu Değiştir
               </button>
               
-              <div className="bg-[#36393f] p-8 rounded shadow-2xl w-full max-w-sm relative z-10">
+              <div className="bg-[#313338] p-8 rounded shadow-2xl w-full max-w-sm relative z-10">
                   <div className="text-center mb-6">
                       <h2 className="text-2xl font-bold text-white mb-2">
                           {authMode === 'login' ? 'Tekrar Hoş Geldin!' : (authMode === 'register' ? 'Hesap Oluştur' : 'Şifre Sıfırlama')}
@@ -748,7 +932,7 @@ const App: React.FC = () => {
                              <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">E-Posta</label>
                              <input 
                                   type="email" 
-                                  className="w-full bg-[#202225] text-white p-3 rounded-lg border-2 border-[#202225] focus:border-discord-accent focus:bg-[#2f3136] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
+                                  className="w-full bg-[#1e1f22] text-white p-3 rounded-lg border-2 border-[#1e1f22] focus:border-discord-accent focus:bg-[#40444b] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
                                   value={resetEmail}
                                   onChange={e => setResetEmail(e.target.value)}
                                   required
@@ -762,7 +946,7 @@ const App: React.FC = () => {
                                 <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">Kullanıcı Adı</label>
                                 <input 
                                     type="text" 
-                                    className="w-full bg-[#202225] text-white p-3 rounded-lg border-2 border-[#202225] focus:border-discord-accent focus:bg-[#2f3136] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
+                                    className="w-full bg-[#1e1f22] text-white p-3 rounded-lg border-2 border-[#1e1f22] focus:border-discord-accent focus:bg-[#40444b] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
                                     value={authUsername}
                                     onChange={e => setAuthUsername(e.target.value)}
                                     required
@@ -773,7 +957,7 @@ const App: React.FC = () => {
                                 <label className="text-xs font-bold text-discord-muted uppercase mb-1 block">Şifre</label>
                                 <input 
                                     type="password" 
-                                    className="w-full bg-[#202225] text-white p-3 rounded-lg border-2 border-[#202225] focus:border-discord-accent focus:bg-[#2f3136] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
+                                    className="w-full bg-[#1e1f22] text-white p-3 rounded-lg border-2 border-[#1e1f22] focus:border-discord-accent focus:bg-[#40444b] focus:ring-4 focus:ring-discord-accent/50 focus:shadow-[0_0_15px_rgba(88,101,242,0.5)] outline-none transition-all duration-300 ease-out shadow-inner"
                                     value={authPassword}
                                     onChange={e => setAuthPassword(e.target.value)}
                                     required
@@ -831,11 +1015,11 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      {/* 2. Channel List */}
-      <div className="w-60 bg-discord-sidebar flex flex-col shrink-0">
-        <div onClick={() => setIsSettingsOpen(true)} className="h-12 shadow-sm flex items-center justify-between px-4 font-bold text-white border-b border-black/10 hover:bg-discord-hover cursor-pointer">
-          <span className="truncate">{serverName}</span>
-          <div className="flex space-x-2">
+      {/* 2. Channel List - DARALTILDI (w-60 -> w-48) */}
+      <div className="w-48 bg-discord-sidebar flex flex-col shrink-0">
+        <div onClick={() => setIsSettingsOpen(true)} className="h-12 shadow-sm flex items-center justify-between px-3 font-bold text-white border-b border-black/10 hover:bg-discord-hover cursor-pointer">
+          <span className="truncate text-base">{serverName}</span>
+          <div className="flex space-x-1">
              <button onClick={(e) => { e.stopPropagation(); handleCreateInvite(); }} className="hover:text-white text-gray-400"><InviteIcon className="w-4 h-4" /></button>
              <SettingsIcon className="w-4 h-4 opacity-50" />
           </div>
@@ -845,45 +1029,69 @@ const App: React.FC = () => {
           {/* Text Channels */}
           <div className="flex items-center justify-between text-discord-muted px-2 mb-1 mt-2">
              <span className="text-xs font-bold uppercase hover:text-discord-text cursor-pointer">Metin Kanalları</span>
-             <button onClick={() => openChannelModal('create', 'text')} className="text-discord-muted hover:text-discord-text"><PlusIcon className="w-4 h-4" /></button>
+             {/* Only admins can create channels */}
+             {currentUser?.isAdmin && (
+                 <button onClick={() => openChannelModal('create', 'text')} className="text-discord-muted hover:text-discord-text"><PlusIcon className="w-3 h-3" /></button>
+             )}
           </div>
           {textChannels.map(channel => (
              <div key={channel.id} onClick={() => { setViewMode('chat'); setActiveTextChannelId(channel.id); }} className={`group flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer mb-0.5 ${activeTextChannelId === channel.id && viewMode === 'chat' ? 'bg-discord-hover text-white' : 'text-discord-muted hover:bg-discord-hover hover:text-discord-text'}`}>
                 <div className="flex items-center overflow-hidden">
-                  <HashtagIcon className="shrink-0 mr-2" />
-                  <span className="font-medium truncate">{channel.name}</span>
+                  <HashtagIcon className="shrink-0 mr-2 w-4 h-4" />
+                  <span className="font-medium truncate text-base">{channel.name}</span>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); openChannelModal('edit', 'text', channel); }} className="hidden group-hover:block text-discord-muted hover:text-discord-text">
-                    <SettingsIcon className="w-3.5 h-3.5" />
-                </button>
+                {/* Only admins can edit channels */}
+                {currentUser?.isAdmin && (
+                    <button onClick={(e) => { e.stopPropagation(); openChannelModal('edit', 'text', channel); }} className="hidden group-hover:block text-discord-muted hover:text-discord-text">
+                        <SettingsIcon className="w-3 h-3" />
+                    </button>
+                )}
              </div>
           ))}
 
           {/* Voice Channels */}
           <div className="flex items-center justify-between text-discord-muted px-2 mb-1 mt-4">
             <span className="text-xs font-bold uppercase hover:text-discord-text cursor-pointer">Ses Kanalları</span>
-            <button onClick={() => openChannelModal('create', 'voice')} className="text-discord-muted hover:text-discord-text"><PlusIcon className="w-4 h-4" /></button>
+            {/* Only admins can create voice channels */}
+            {currentUser?.isAdmin && (
+                <button onClick={() => openChannelModal('create', 'voice')} className="text-discord-muted hover:text-discord-text"><PlusIcon className="w-3 h-3" /></button>
+            )}
           </div>
           {voiceChannels.map(channel => (
              <div key={channel.id}>
                 <div onClick={() => { setViewMode('voice'); setActiveVoiceChannelId(channel.id); }} className={`group flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer ${activeVoiceChannelId === channel.id && viewMode === 'voice' ? 'bg-discord-hover text-white' : 'text-discord-muted hover:bg-discord-hover hover:text-discord-text'}`}>
                   <div className="flex items-center overflow-hidden">
-                    <Volume2Icon className="shrink-0 mr-2" />
-                    <span className="font-medium truncate">{channel.name}</span>
+                    <Volume2Icon className="shrink-0 mr-2 w-4 h-4" />
+                    <span className="font-medium truncate text-base">{channel.name}</span>
                   </div>
-                   <button onClick={(e) => { e.stopPropagation(); openChannelModal('edit', 'voice', channel); }} className="hidden group-hover:block text-discord-muted hover:text-discord-text">
-                        <SettingsIcon className="w-3.5 h-3.5" />
-                   </button>
+                   <div className="hidden group-hover:flex items-center space-x-1">
+                       <button onClick={(e) => { e.stopPropagation(); setOpenVoiceChatId(prev => prev === channel.id ? null : channel.id); }} className="text-discord-muted hover:text-white" title="Sohbeti Göster">
+                            <MessageSquareIcon className="w-3 h-3" />
+                       </button>
+                       {/* Only admins can edit voice channels */}
+                       {currentUser?.isAdmin && (
+                            <button onClick={(e) => { e.stopPropagation(); openChannelModal('edit', 'voice', channel); }} className="text-discord-muted hover:text-discord-text">
+                                <SettingsIcon className="w-3 h-3" />
+                            </button>
+                       )}
+                   </div>
                 </div>
                 {/* Users in channel */}
                 <div className="pl-4">
                     {onlineUsers.filter(u => u.voiceChannelId === channel.id).map(user => (
                         <div key={user.socketId} className="flex items-center py-1 group cursor-pointer">
-                            <img src={user.avatar} className={`w-6 h-6 rounded-full border-2 ${user.isStreaming ? 'border-red-500' : 'border-gray-500'}`} />
+                            <div className="relative">
+                                <img src={user.avatar} className={`w-5 h-5 rounded-full border-2 ${user.isStreaming ? 'border-red-500' : 'border-gray-500'}`} />
+                                {user.isAdmin && (
+                                    <div className="absolute -top-1.5 -right-1 text-yellow-500">
+                                        <CrownIcon className="w-3 h-3 drop-shadow-md" />
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex flex-col ml-2 overflow-hidden">
-                                <span className={`text-sm truncate ${user.socketId === socketRef.current?.id ? 'text-white font-bold' : 'text-gray-400'}`}>{user.name}</span>
+                                <span className={`text-base truncate ${user.socketId === socketRef.current?.id ? 'text-white font-bold' : 'text-gray-400'}`}>{user.name}</span>
                                 <div className="flex items-center space-x-1">
-                                    {user.isStreaming && <span className="text-[8px] bg-red-500 text-white px-1 rounded">YAYIN</span>}
+                                    {user.isStreaming && <span className="text-[10px] bg-red-500 text-white px-1 rounded">LIVE</span>}
                                     {user.isMuted && <MicOffIcon className="w-3 h-3 text-red-500" />}
                                     {user.isDeafened && <HeadphoneOffIcon className="w-3 h-3 text-red-500" />}
                                 </div>
@@ -896,26 +1104,30 @@ const App: React.FC = () => {
         </div>
 
         {/* User Status */}
-        <div className="h-[52px] bg-[#292b2f] flex items-center px-2 space-x-2 shrink-0">
-          <img src={currentUser?.avatar || DEFAULT_AVATAR} className="w-8 h-8 rounded-full" alt="Me" />
-          <div className="flex-1 overflow-hidden">
-            <div className="text-white text-sm font-bold truncate">{currentUser?.name}</div>
-            <div className="text-xs text-discord-muted text-[10px]">#{currentUser?.id?.substring(0,4)}</div>
+        <div className="h-[52px] bg-[#232428] flex items-center px-2 space-x-1 shrink-0">
+          <div className="relative">
+              <img src={currentUser?.avatar || DEFAULT_AVATAR} className="w-8 h-8 rounded-full" alt="Me" />
+              {currentUser?.isAdmin && (
+                  <div className="absolute -top-2 -right-1 text-yellow-500">
+                      <CrownIcon className="w-4 h-4 drop-shadow-md" />
+                  </div>
+              )}
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex-1 overflow-hidden ml-1">
+            <div className="text-white text-base font-bold truncate">{currentUser?.name}</div>
+            <div className="text-xs text-discord-muted">{getDisplayId(currentUser)}</div>
+          </div>
+          <div className="flex items-center">
               <button onClick={toggleMute} className="text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded relative">
-                  {isMuted ? <MicOffIcon className="w-5 h-5 text-red-500" /> : <MicIcon className="w-5 h-5" />}
-                  {isMuted && <div className="absolute w-full h-[2px] bg-red-500 rotate-45 top-1/2 left-0"></div>}
+                  {isMuted ? <MicOffIcon className="w-4 h-4 text-red-500" /> : <MicIcon className="w-4 h-4" />}
+                  {isMuted && <div className="absolute w-full h-[1.5px] bg-red-500 rotate-45 top-1/2 left-0"></div>}
               </button>
               <button onClick={toggleDeafen} className="text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded relative">
-                   {isDeafened ? <HeadphoneOffIcon className="w-5 h-5 text-red-500" /> : <HeadphoneIcon className="w-5 h-5" />}
-                   {isDeafened && <div className="absolute w-full h-[2px] bg-red-500 rotate-45 top-1/2 left-0"></div>}
+                   {isDeafened ? <HeadphoneOffIcon className="w-4 h-4 text-red-500" /> : <HeadphoneIcon className="w-4 h-4" />}
+                   {isDeafened && <div className="absolute w-full h-[1.5px] bg-red-500 rotate-45 top-1/2 left-0"></div>}
               </button>
               <button onClick={() => setIsUserSettingsOpen(true)} className="text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded" title="Kullanıcı Ayarları">
-                   <SettingsIcon className="w-5 h-5" />
-              </button>
-              <button onClick={disconnect} className="text-gray-400 hover:text-red-500 hover:bg-gray-700 p-1 rounded" title="Çıkış Yap">
-                  <PhoneMissedIcon className="w-5 h-5"/>
+                   <SettingsIcon className="w-4 h-4" />
               </button>
           </div>
         </div>
@@ -927,7 +1139,7 @@ const App: React.FC = () => {
         <div className="h-12 shadow-sm flex items-center justify-between px-4 border-b border-black/10 shrink-0">
           <div className="flex items-center">
             <span className="text-discord-muted mr-2">{viewMode === 'chat' ? <HashtagIcon /> : <Volume2Icon />}</span>
-            <span className="text-white font-bold">{viewMode === 'chat' ? currentTextChannelName : (voiceChannels.find(c => c.id === activeVoiceChannelId)?.name)}</span>
+            <span className="text-white font-bold text-lg">{viewMode === 'chat' ? currentTextChannelName : (voiceChannels.find(c => c.id === activeVoiceChannelId)?.name)}</span>
           </div>
           {viewMode === 'chat' && (
               <div className="flex items-center">
@@ -940,31 +1152,101 @@ const App: React.FC = () => {
         <div className="flex-1 overflow-hidden relative">
             
             {/* VOICE / STREAM VIEW */}
-            <div className={`absolute inset-0 p-4 transition-opacity duration-300 ${viewMode === 'voice' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+            <div 
+                className={`absolute inset-0 p-4 transition-opacity duration-300 ${viewMode === 'voice' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+                onMouseMove={handleMouseMove}
+            >
                 <div className="h-full bg-black rounded-xl overflow-hidden relative flex">
                     <div className="flex-1 relative flex flex-wrap content-center justify-center p-4 gap-4">
                         {/* Local & Remote Videos (Screen Shares) */}
                         {usersInActiveVoice.length === 0 && <div className="text-gray-500">Kanala bağlı kimse yok.</div>}
                         
-                        {(usersInActiveVoice || []).map(user => (
-                            <div key={user.socketId} className={`relative bg-gray-800 rounded-lg overflow-hidden transition-all ${user.isStreaming ? 'w-full h-full' : 'w-48 h-48'}`}>
-                                {user.isStreaming ? (
+                        {activeStreamer ? (
+                           // --- SPOTLIGHT MODE (Screen Share Active) ---
+                           <div id="stream-spotlight" className="w-full h-full relative flex items-center justify-center bg-black">
+                                {locallyHiddenVideos.has(activeStreamer.socketId) ? (
+                                    <div className="flex flex-col items-center justify-center text-gray-500">
+                                        <EyeOffIcon className="w-16 h-16 mb-4" />
+                                        <span className="text-xl">Görüntü Gizlendi</span>
+                                    </div>
+                                ) : (
                                     <video 
-                                        ref={(el) => {
+                                        ref={(el: HTMLVideoElement | null) => {
                                             if (!el) return;
                                             
-                                            // Remote stream handling
+                                            // Handle stream binding for Spotlight
+                                            const remoteStream = remoteVideoStreamsRef.current[activeStreamer.socketId];
+                                            const localStream = screenStreamRef.current;
+                                            
+                                            if (activeStreamer.socketId !== socketRef.current?.id && remoteStream) {
+                                                if (el.srcObject !== remoteStream) el.srcObject = remoteStream;
+                                            } else if (activeStreamer.socketId === socketRef.current?.id && localStream) {
+                                                if (el.srcObject !== localStream) {
+                                                    el.srcObject = localStream;
+                                                    el.muted = true;
+                                                }
+                                            }
+                                        }}
+                                        className="w-full h-full object-contain" 
+                                        autoPlay 
+                                        playsInline 
+                                    />
+                                )}
+                                
+                                {/* Full Screen Toggle Button */}
+                                <button 
+                                    onClick={() => {
+                                        const el = document.getElementById('stream-spotlight');
+                                        if (el && el.requestFullscreen) {
+                                            el.requestFullscreen();
+                                        }
+                                    }}
+                                    className={`absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white p-2 rounded-lg backdrop-blur-sm transition-opacity duration-500 z-20 group ${showControls ? 'opacity-100' : 'opacity-0'}`}
+                                    title="Tam Ekran Yap"
+                                >
+                                    <MaximizeIcon className="w-6 h-6" />
+                                </button>
+                                
+                                {/* Local Controls (Mute/Hide) for Spotlight */}
+                                {activeStreamer.socketId !== socketRef.current?.id && (
+                                    <div className={`absolute top-4 left-4 flex space-x-2 transition-opacity duration-500 z-20 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+                                        <button 
+                                            onClick={() => toggleRemoteVideoLocal(activeStreamer.socketId)}
+                                            className={`p-2 rounded-lg backdrop-blur-sm ${locallyHiddenVideos.has(activeStreamer.socketId) ? 'bg-red-600 text-white' : 'bg-black/60 text-gray-300 hover:text-white'}`}
+                                            title="Görüntüyü Gizle/Göster (Sadece Sen)"
+                                        >
+                                            {locallyHiddenVideos.has(activeStreamer.socketId) ? <EyeOffIcon className="w-5 h-5"/> : <EyeIcon className="w-5 h-5"/>}
+                                        </button>
+                                        <button 
+                                            onClick={() => toggleRemoteAudioLocal(activeStreamer.socketId)}
+                                            className={`p-2 rounded-lg backdrop-blur-sm ${locallyMutedUsers.has(activeStreamer.socketId) ? 'bg-red-600 text-white' : 'bg-black/60 text-gray-300 hover:text-white'}`}
+                                            title="Sesi Kapat/Aç (Sadece Sen)"
+                                        >
+                                            {locallyMutedUsers.has(activeStreamer.socketId) ? <VolumeXIcon className="w-5 h-5"/> : <Volume2Icon className="w-5 h-5"/>}
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className={`absolute bottom-24 left-4 bg-black/60 px-4 py-2 rounded text-white font-bold backdrop-blur-sm z-20 border border-white/10 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+                                   {activeStreamer.name} yayını
+                                </div>
+                           </div>
+                        ) : (
+                           // --- GRID MODE (No Screen Share) ---
+                           (usersInActiveVoice || []).map(user => (
+                            <div key={user.socketId} className={`relative bg-gray-800 rounded-lg overflow-hidden transition-all group ${user.isStreaming ? 'w-full h-full' : 'w-48 h-48'}`}>
+                                {user.isStreaming && !locallyHiddenVideos.has(user.socketId) ? (
+                                    <video 
+                                        ref={(el: HTMLVideoElement | null) => {
+                                            if (!el) return;
+                                            // ... existing grid ref logic ...
                                             const remoteStream = remoteVideoStreamsRef.current[user.socketId];
                                             if (remoteStream) {
-                                                if (el.srcObject !== remoteStream) {
-                                                    el.srcObject = remoteStream;
-                                                }
-                                            } 
-                                            // Local preview handling
-                                            else if (user.socketId === socketRef.current?.id && screenStreamRef.current) {
+                                                if (el.srcObject !== remoteStream) el.srcObject = remoteStream;
+                                            } else if (user.socketId === socketRef.current?.id && screenStreamRef.current) {
                                                 if (el.srcObject !== screenStreamRef.current) {
                                                     el.srcObject = screenStreamRef.current;
-                                                    el.muted = true; // Always mute own video audio
+                                                    el.muted = true; 
                                                 }
                                             }
                                         }}
@@ -973,26 +1255,84 @@ const App: React.FC = () => {
                                         playsInline 
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center flex-col">
-                                        <img src={user.avatar} className="w-16 h-16 rounded-full mb-2" />
-                                        <span className="text-white font-bold">{user.name}</span>
+                                    <div className="w-full h-full flex items-center justify-center flex-col relative">
+                                        {/* Show eye-off icon if video is hidden locally */}
+                                        {user.isStreaming && locallyHiddenVideos.has(user.socketId) && <EyeOffIcon className="absolute top-2 right-2 text-red-500" />}
+                                        
+                                        <div className="relative mb-2">
+                                            <img src={user.avatar} className="w-16 h-16 rounded-full" />
+                                            {user.isAdmin && (
+                                                <div className="absolute -top-3 -right-2 text-yellow-500">
+                                                    <CrownIcon className="w-6 h-6 drop-shadow-md" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span className="text-white font-bold text-lg">{user.name}</span>
                                         <div className="flex mt-2 space-x-2">
                                             {user.isMuted && <MicOffIcon className="text-red-500 w-4 h-4" />}
                                             {user.isDeafened && <HeadphoneOffIcon className="text-red-500 w-4 h-4" />}
+                                            {/* Local Mute Indicator */}
+                                            {locallyMutedUsers.has(user.socketId) && (
+                                                <div title="Sen susturdun" className="flex items-center">
+                                                    <VolumeXIcon className="text-red-500 w-4 h-4" />
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
-                                <div className="absolute bottom-2 left-2 bg-black/50 px-2 rounded text-white text-xs">{user.name}</div>
+                                
+                                {/* Local Controls Overlay (Only for remote users) */}
+                                {user.socketId !== socketRef.current?.id && (
+                                    <div className="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded p-1">
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); toggleRemoteAudioLocal(user.socketId); }}
+                                            className={`p-1 rounded hover:bg-gray-700 ${locallyMutedUsers.has(user.socketId) ? 'text-red-500' : 'text-gray-300'}`}
+                                            title="Sesi Yerel Olarak Kapat/Aç"
+                                        >
+                                           {locallyMutedUsers.has(user.socketId) ? <VolumeXIcon className="w-4 h-4"/> : <Volume2Icon className="w-4 h-4"/>}
+                                        </button>
+                                        {user.isStreaming && (
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); toggleRemoteVideoLocal(user.socketId); }}
+                                                className={`p-1 rounded hover:bg-gray-700 ${locallyHiddenVideos.has(user.socketId) ? 'text-red-500' : 'text-gray-300'}`}
+                                                title="Görüntüyü Yerel Olarak Gizle/Aç"
+                                            >
+                                               {locallyHiddenVideos.has(user.socketId) ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
+                                            </button>
+                                        )}
+                                        {/* BAN BUTTON FOR ADMINS IN GRID */}
+                                        {currentUser?.isAdmin && (
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleBanUser(user.id, user.name); }}
+                                                className="p-1 rounded hover:bg-red-600 text-gray-300 hover:text-white"
+                                                title="Kullanıcıyı Banla"
+                                            >
+                                                <HammerIcon className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className={`absolute bottom-2 left-2 bg-black/50 px-2 rounded text-white text-sm transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>{user.name}</div>
                             </div>
-                        ))}
+                           ))
+                        )}
+
+                        {/* Connection Status Indicator - MOVED HERE & FIXED VISIBILITY */}
+                        {currentUser?.voiceChannelId === activeVoiceChannelId && (
+                            <div className={`absolute bottom-24 left-1/2 transform -translate-x-1/2 flex items-center bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md transition-opacity duration-500 z-30 pointer-events-none ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+                                 <div className={`w-2 h-2 rounded-full mr-2 ${statusUI.color} ${statusUI.glow}`}></div>
+                                 <span className={`text-xs font-bold ${statusUI.textColor}`}>{statusUI.text}</span>
+                            </div>
+                        )}
 
                         {/* Controls */}
-                        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/80 px-6 py-3 rounded-2xl border border-white/10">
+                        <div className={`absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/80 px-6 py-3 rounded-2xl border border-white/10 z-30 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
                             {localStreamRef.current ? (
                                 <>
                                     <button onClick={leaveVoiceChannel} className="bg-red-500 p-3 rounded-full text-white hover:bg-red-600"><PhoneMissedIcon /></button>
                                     <button onClick={toggleScreenShare} className={`p-3 rounded-full ${isScreenSharing ? 'bg-white text-black' : 'bg-gray-700 text-white'}`}><ScreenShareIcon /></button>
-                                    <button onClick={() => setIsVoiceChatOpen(!isVoiceChatOpen)} className={`p-3 rounded-full ${isVoiceChatOpen ? 'bg-white text-black' : 'bg-gray-700 text-white'}`} title="Sohbeti Göster"><MessageSquareIcon /></button>
+                                    <button onClick={() => setOpenVoiceChatId(prev => prev ? null : activeVoiceChannelId)} className={`p-3 rounded-full ${openVoiceChatId ? 'bg-white text-black' : 'bg-gray-700 text-white'}`} title="Sohbeti Göster"><MessageSquareIcon /></button>
                                 </>
                             ) : (
                                 <button onClick={() => joinVoiceChannel(activeVoiceChannelId)} className="bg-green-600 px-6 py-2 rounded-full text-white font-bold flex items-center hover:bg-green-700">
@@ -1003,299 +1343,372 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Right Side Voice Chat Panel */}
-                    {isVoiceChatOpen && (
-                        <div className="w-80 bg-discord-sidebar border-l border-black/20 flex flex-col shrink-0 animate-fadeIn">
-                             <div className="h-12 border-b border-black/10 flex items-center px-4 font-bold text-white justify-between">
-                                 <span>Kanal Sohbeti</span>
-                                 <button onClick={() => setIsVoiceChatOpen(false)}><CloseIcon className="w-5 h-5 text-gray-400 hover:text-white" /></button>
+                    {openVoiceChatId && (
+                        <div className="w-80 bg-[#2b2d31] border-l border-white/10 flex flex-col shrink-0 animate-slideIn transition-all duration-300">
+                             <div className="h-12 border-b border-black/20 flex items-center justify-between px-4 shrink-0 shadow-sm bg-[#313338]">
+                                <span className="font-bold text-white flex items-center">
+                                    <MessageSquareIcon className="w-4 h-4 mr-2 text-gray-400" />
+                                    Sohbet
+                                </span>
+                                <button onClick={() => setOpenVoiceChatId(null)} className="text-gray-400 hover:text-white transition-colors p-1 rounded hover:bg-white/10">
+                                    <CloseIcon className="w-5 h-5" />
+                                </button>
                              </div>
+                             
                              <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={voiceChatScrollRef}>
-                                 {(textChatData[activeVoiceChannelId] || []).length === 0 && <div className="text-gray-500 text-center text-sm mt-4">Henüz mesaj yok.</div>}
-                                 {(textChatData[activeVoiceChannelId] || []).map((msg, i) => (
-                                     <div key={i} className="flex flex-col">
-                                         <div className="flex items-center space-x-2 mb-1">
-                                             <img src={msg.senderAvatar} className="w-6 h-6 rounded-full" />
-                                             <span className="font-bold text-xs text-white">{msg.senderName}</span>
-                                             <span className="text-[10px] text-gray-500">{new Date(msg.timestamp).toLocaleTimeString()}</span>
-                                         </div>
-                                         <p className="text-gray-300 text-sm pl-8 break-words">{msg.text}</p>
-                                     </div>
-                                 ))}
-                             </div>
-                             <div className="p-3 bg-discord-main">
-                                 <form onSubmit={(e) => handleTextSubmit(e, true)}>
-                                     <input 
-                                         value={voiceChatInput}
-                                         onChange={(e) => setVoiceChatInput(e.target.value)}
-                                         placeholder="Mesaj gönder..."
-                                         className="w-full bg-[#40444b] text-white px-3 py-2 rounded text-sm outline-none"
-                                     />
-                                 </form>
-                             </div>
+                                {(textChatData[openVoiceChatId] || []).map((msg, i, arr) => {
+                                    const prevMsg = arr[i-1];
+                                    const showHeader = !prevMsg || prevMsg.sender !== msg.sender || (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() > 60000 * 5);
+                                    const isMe = msg.sender === (socketRef.current?.id || 'me');
+                                    
+                                    return (
+                                        <div key={msg.id} className={`group flex flex-col ${!showHeader ? 'mt-0.5' : 'mt-4'}`}>
+                                            {showHeader && (
+                                                <div className="flex items-center mb-1">
+                                                    <img src={msg.senderAvatar} className="w-8 h-8 rounded-full mr-2 cursor-pointer hover:opacity-80" />
+                                                    <div className="flex items-baseline space-x-2">
+                                                        <span className="font-bold text-white text-sm hover:underline cursor-pointer">{msg.senderName}</span>
+                                                        <span className="text-[10px] text-gray-400">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className={`pl-10 relative group ${msg.isDeleted ? 'opacity-50 italic' : ''}`}>
+                                                 {msg.isDeleted ? (
+                                                     <span className="text-gray-400 text-sm">Mesaj silindi.</span>
+                                                 ) : (
+                                                     <>
+                                                        <p className="text-gray-100 text-sm whitespace-pre-wrap break-words leading-snug">{msg.text}</p>
+                                                        {(isMe || currentUser?.isAdmin) && (
+                                                            <div className="absolute -top-2 right-0 bg-[#2b2d31] shadow-sm rounded flex items-center p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button onClick={() => handleDeleteMessage(openVoiceChatId, msg.id)} className="text-gray-400 hover:text-red-500 p-1"><TrashIcon className="w-3 h-3" /></button>
+                                                            </div>
+                                                        )}
+                                                     </>
+                                                 )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                <div className="h-4"></div>
+                            </div>
+                            
+                            <div className="p-3 bg-[#2b2d31] shrink-0">
+                                <form onSubmit={(e) => handleTextSubmit(e, true)} className="bg-[#383a40] rounded-lg p-2 flex items-center">
+                                    <input 
+                                        className="bg-transparent text-gray-200 placeholder-gray-500 text-sm w-full outline-none px-2"
+                                        placeholder={`#${voiceChannels.find(c => c.id === openVoiceChatId)?.name} kanalına mesaj gönder`}
+                                        value={voiceChatInput}
+                                        onChange={e => setVoiceChatInput(e.target.value)}
+                                    />
+                                    <button type="submit" disabled={!voiceChatInput.trim()} className={`${voiceChatInput.trim() ? 'text-discord-accent' : 'text-gray-500'}`}>
+                                        <SendIcon className="w-4 h-4" />
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
 
             {/* CHAT VIEW */}
-            <div className={`absolute inset-0 flex flex-col bg-discord-main transition-opacity duration-300 ${viewMode === 'chat' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                 <div className="flex-1 flex overflow-hidden">
-                    {/* Main Chat Area */}
-                    <div className="flex-1 flex flex-col min-w-0">
-                         <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={textChatScrollRef}>
-                            {(textChatData[activeTextChannelId] || []).map((msg, i) => (
-                                <div key={i} className="group relative">
-                                   {/* Reply Preview */}
-                                   {msg.replyTo && (
-                                     <div className="flex items-center mb-1 text-xs text-gray-400 opacity-60 ml-14">
-                                        <div className="w-8 border-t-2 border-l-2 border-gray-500 h-3 rounded-tl-md -ml-6 mr-2 mt-2"></div>
-                                        <span className="font-bold mr-1">@{msg.replyTo.senderName}</span>
-                                        <span className="truncate max-w-xs">{msg.replyTo.text}</span>
-                                     </div>
-                                   )}
-
-                                   <div className="flex hover:bg-[#32353b] -mx-4 px-4 py-1 relative">
-                                     {/* Reply Action Button */}
-                                     <div className="absolute right-4 top-2 hidden group-hover:flex bg-[#36393f] rounded shadow-sm border border-black/20 z-10">
-                                       <button 
-                                         onClick={() => setReplyingTo(msg)}
-                                         className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors" 
-                                         title="Yanıtla"
-                                       >
-                                         <ReplyIcon className="w-4 h-4" />
-                                       </button>
-                                     </div>
-
-                                     <img src={msg.senderAvatar || DEFAULT_AVATAR} className="w-10 h-10 rounded-full mr-4 mt-0.5" />
-                                     <div className="flex-1 min-w-0">
-                                         <div className="flex items-center space-x-2">
-                                            <span className="font-medium text-white hover:underline cursor-pointer">{msg.senderName}</span>
-                                            <span className="text-xs text-discord-muted">{new Date(msg.timestamp).toLocaleString()}</span>
-                                         </div>
-                                         <p className="text-discord-text break-words">{msg.text}</p>
-                                     </div>
-                                   </div>
+            <div className={`absolute inset-0 flex flex-row transition-opacity duration-300 ${viewMode === 'chat' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                 {/* 1. Chat Content Wrapper (Messages + Input) */}
+                 <div className="flex-1 flex flex-col min-w-0 bg-discord-main">
+                     {/* Chat Messages */}
+                     <div className="flex-1 overflow-y-auto p-4 space-y-1" ref={textChatScrollRef}>
+                        <div className="flex flex-col justify-end min-h-full">
+                            <div className="mb-4">
+                                <div className="w-16 h-16 bg-discord-accent rounded-full flex items-center justify-center mb-4">
+                                    <HashtagIcon className="w-10 h-10 text-white" />
                                 </div>
-                            ))}
-                         </div>
-                         
-                         <div className="px-4 pb-4 pt-2 bg-discord-main">
-                            {replyingTo && (
-                              <div className="bg-[#2f3136] px-4 py-2 flex items-center justify-between border-t border-l border-r border-gray-700 rounded-t-lg">
-                                <span className="text-gray-400 text-sm flex items-center">
-                                   <span className="mr-2 text-discord-text text-xs">Yanıtlanıyor:</span>
-                                   <span className="font-bold text-gray-300 mr-1">@{replyingTo.senderName}</span>
-                                   <span className="truncate max-w-xs text-gray-500 text-xs italic opacity-70">
-                                     {replyingTo.text}
-                                   </span>
-                                </span>
-                                <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700">
-                                  <CloseIcon className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
-                            <form onSubmit={(e) => handleTextSubmit(e, false)} className={`relative flex items-center bg-discord-chat ${replyingTo ? 'rounded-b-lg' : 'rounded-lg'}`}>
-                               <button type="button" className="absolute left-4 text-discord-muted hover:text-white cursor-pointer"><PlusIcon /></button>
-                               <input 
-                                 value={inputMessage}
-                                 onChange={(e) => setInputMessage(e.target.value)}
-                                 placeholder={`#${currentTextChannelName} kanalına mesaj gönder`}
-                                 className="w-full bg-transparent text-discord-text pl-12 pr-10 py-3 outline-none focus:ring-0 font-medium"
-                               />
-                               <button type="submit" className="absolute right-3 text-discord-muted hover:text-white p-1">
-                                  <SendIcon />
-                               </button>
-                            </form>
-                         </div>
-                    </div>
+                                <h1 className="text-3xl font-bold text-white mb-1">#{currentTextChannelName}</h1>
+                                <p className="text-gray-400">Bu kanalın başlangıcına hoş geldin.</p>
+                            </div>
+                            
+                            {(textChatData[activeTextChannelId] || []).map((msg, i, arr) => {
+                                const prevMsg = arr[i-1];
+                                const isNewGroup = !prevMsg || prevMsg.sender !== msg.sender || (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() > 60000 * 5);
+                                const dateDivider = !prevMsg || new Date(msg.timestamp).toDateString() !== new Date(prevMsg.timestamp).toDateString();
+                                const isMe = msg.sender === (socketRef.current?.id || 'me');
 
-                    {/* Member List Sidebar */}
-                    {showMemberList && (
-                        <div className="w-60 bg-[#2f3136] flex flex-col overflow-y-auto border-l border-black/20 shrink-0">
-                             <div className="p-4">
-                                 <h3 className="uppercase text-xs font-bold text-discord-muted mb-2">Çevrimiçi — {onlineUsers.length}</h3>
-                                 <div className="space-y-2">
-                                     {onlineUsers.map(user => (
-                                         <div key={user.socketId} className="flex items-center px-2 py-2 hover:bg-discord-hover rounded cursor-pointer opacity-90 hover:opacity-100 group">
-                                             <div className="relative">
-                                                 <img src={user.avatar} className="w-8 h-8 rounded-full bg-discord-dark" />
-                                                 <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#2f3136] ${user.voiceChannelId ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                                             </div>
-                                             <div className="ml-3 flex-1 min-w-0">
-                                                 <div className="text-white font-medium text-sm truncate">{user.name}</div>
-                                                 {user.voiceChannelId && (
-                                                     <div className="flex items-center space-x-1 mt-0.5">
-                                                         {user.isStreaming && <span className="text-[9px] bg-red-500 text-white px-1 rounded font-bold uppercase tracking-wider">CANLI</span>}
-                                                         {user.isMuted && <MicOffIcon className="w-3 h-3 text-red-500" />}
-                                                         {user.isDeafened && <HeadphoneOffIcon className="w-3 h-3 text-red-500" />}
-                                                     </div>
-                                                 )}
-                                             </div>
-                                         </div>
-                                     ))}
-                                 </div>
-                             </div>
+                                return (
+                                    <div key={msg.id}>
+                                        {dateDivider && (
+                                            <div className="relative flex items-center py-4">
+                                                <div className="flex-grow border-t border-gray-700"></div>
+                                                <span className="flex-shrink-0 mx-4 text-gray-500 text-xs font-medium">{formatDateDivider(msg.timestamp)}</span>
+                                                <div className="flex-grow border-t border-gray-700"></div>
+                                            </div>
+                                        )}
+                                        
+                                        <div className={`group flex pr-4 hover:bg-[#2e3035] -mx-4 px-4 py-0.5 ${isNewGroup ? 'mt-4' : ''}`}>
+                                            {isNewGroup ? (
+                                                <img src={msg.senderAvatar} className="w-10 h-10 rounded-full mr-4 mt-0.5 cursor-pointer hover:opacity-80" />
+                                            ) : (
+                                                <div className="w-10 mr-4 text-[10px] text-gray-500 opacity-0 group-hover:opacity-100 text-right self-center select-none">
+                                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            )}
+                                            
+                                            <div className="flex-1 min-w-0">
+                                                {isNewGroup && (
+                                                    <div className="flex items-center">
+                                                        <span className="font-bold text-white mr-2 hover:underline cursor-pointer">{msg.senderName}</span>
+                                                        <span className="text-xs text-gray-400">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    </div>
+                                                )}
+                                                
+                                                <div className="text-gray-100 whitespace-pre-wrap break-words leading-snug relative">
+                                                    {msg.replyTo && isNewGroup && (
+                                                        <div className="flex items-center mb-1 text-gray-400 text-xs opacity-80">
+                                                            <div className="w-8 border-t-2 border-l-2 border-gray-600 rounded-tl-lg h-2 mr-1"></div>
+                                                            <img src={DEFAULT_AVATAR} className="w-3 h-3 rounded-full mr-1" />
+                                                            <span className="font-bold mr-1">@{msg.replyTo.senderName}</span>
+                                                            <span className="truncate">{msg.replyTo.text}</span>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {msg.isDeleted ? (
+                                                        <span className="italic text-gray-500 text-sm">Bu mesaj silindi.</span>
+                                                    ) : (
+                                                        <>
+                                                            {msg.text}
+                                                            {(msg.timestamp && canDeleteMessage(msg.timestamp) && (isMe || currentUser?.isAdmin)) && (
+                                                                <div className="absolute -top-4 right-0 bg-[#313338] shadow rounded flex items-center p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-black/20">
+                                                                    <button onClick={() => setReplyingTo(msg)} className="text-gray-400 hover:text-white p-1" title="Yanıtla"><ReplyIcon className="w-4 h-4" /></button>
+                                                                    <button onClick={() => handleDeleteMessage(activeTextChannelId, msg.id)} className="text-gray-400 hover:text-red-500 p-1" title="Sil"><TrashIcon className="w-4 h-4" /></button>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    )}
+                     </div>
+
+                     {/* Chat Input */}
+                     <div className="p-4 shrink-0">
+                        {replyingTo && (
+                            <div className="bg-[#2b2d31] p-2 rounded-t-lg flex items-center justify-between border-b border-white/10 text-sm text-gray-300">
+                                 <div className="flex items-center">
+                                     <span className="mr-2">Yanıtlanıyor: <strong>{replyingTo.senderName}</strong></span>
+                                     <span className="truncate max-w-xs text-gray-500">{replyingTo.text}</span>
+                                 </div>
+                                 <button onClick={() => setReplyingTo(null)}><CloseIcon className="w-4 h-4" /></button>
+                            </div>
+                        )}
+                        <form onSubmit={(e) => handleTextSubmit(e, false)} className={`bg-[#383a40] flex items-center px-4 py-2.5 ${replyingTo ? 'rounded-b-lg' : 'rounded-lg'}`}>
+                            <button type="button" className="text-gray-400 hover:text-white mr-3"><PlusIcon className="w-5 h-5 bg-gray-400 text-[#383a40] rounded-full p-0.5 hover:bg-white transition-colors" /></button>
+                            <input 
+                                className="bg-transparent flex-1 text-gray-200 placeholder-gray-400 outline-none font-medium" 
+                                placeholder={`#${currentTextChannelName} kanalına mesaj gönder`}
+                                value={inputMessage}
+                                onChange={e => setInputMessage(e.target.value)}
+                            />
+                            <div className="flex items-center space-x-3 ml-3 text-gray-400">
+                                <button type="button" className="hover:text-white"><GiftIcon className="w-5 h-5" /></button>
+                                <button type="button" className="hover:text-white"><StickerIcon className="w-5 h-5" /></button>
+                                <button type="button" className="hover:text-white"><SmileIcon className="w-5 h-5" /></button>
+                            </div>
+                        </form>
+                     </div>
                  </div>
+
+                 {/* 2. Member List Sidebar (Floating Absolute) */}
+                 {showMemberList && (
+                     <div className="absolute top-2 right-2 w-48 max-h-[calc(100%-20px)] bg-[#2b2d31]/95 backdrop-blur-sm shadow-2xl border border-white/5 rounded-lg flex flex-col shrink-0 overflow-y-auto p-2 z-20">
+                         <div className="mb-2">
+                             <h3 className="text-[10px] font-bold text-gray-500 uppercase mb-2 px-2 tracking-wide">ÇEVRİMİÇİ — {onlineUsers.length}</h3>
+                             {onlineUsers.map(user => (
+                                 <div key={user.socketId} className="flex items-center px-2 py-1.5 rounded hover:bg-[#35373c] cursor-pointer group opacity-100 transition-colors">
+                                     <div className="relative">
+                                         <img src={user.avatar} className={`w-7 h-7 rounded-full ${user.isStreaming ? 'border-2 border-red-500' : ''}`} />
+                                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#2b2d31] rounded-full"></div>
+                                         {user.isAdmin && <div className="absolute -top-1 -right-1 text-yellow-500"><CrownIcon className="w-2.5 h-2.5" /></div>}
+                                     </div>
+                                     <div className="ml-2.5 flex-1 overflow-hidden">
+                                         <div className="flex items-center justify-between">
+                                             <span className={`font-bold truncate text-sm ${user.isAdmin ? 'text-pink-400' : 'text-gray-200'}`}>{user.name}</span>
+                                         </div>
+                                         {user.voiceChannelId && (
+                                             <div className="text-[10px] text-gray-400 flex items-center mt-0.5">
+                                                 <Volume2Icon className="w-2.5 h-2.5 mr-1" />
+                                                 <span className="truncate">{voiceChannels.find(c => c.id === user.voiceChannelId)?.name}</span>
+                                             </div>
+                                         )}
+                                     </div>
+                                 </div>
+                             ))}
+                         </div>
+                         <div>
+                             <h3 className="text-[10px] font-bold text-gray-500 uppercase mb-2 px-2 tracking-wide">ÇEVRİMDIŞI — 0</h3>
+                             {/* Placeholder for offline users */}
+                         </div>
+                     </div>
+                 )}
             </div>
+
         </div>
       </div>
 
-      {/* SERVER SETTINGS MODAL */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center animate-fadeIn">
-           <div className="bg-[#36393f] w-[440px] rounded-lg shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100">
-              <div className="p-6">
-                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-white">Sunucu Ayarları</h2>
-                    <button onClick={() => setIsSettingsOpen(false)} className="text-discord-muted hover:text-discord-text transition-colors"><CloseIcon /></button>
-                 </div>
-                 
-                 <div className="space-y-6">
-                    {/* Server Name Input */}
-                    <div>
-                         <label className="text-xs font-bold text-discord-muted uppercase mb-2 block">Sunucu Adı</label>
-                         <input 
-                            type="text"
-                            value={serverName}
-                            onChange={(e) => setServerName(e.target.value)}
-                            className="w-full bg-[#202225] text-white p-2 rounded border border-black/10 focus:border-discord-accent outline-none font-medium"
-                         />
-                    </div>
-
-                    <div className="flex flex-col items-center space-y-4">
-                        <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-discord-dark relative group">
-                           <img src={serverIcon} alt="Server Icon" className="w-full h-full object-cover" />
-                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              <span className="text-xs font-bold text-white">Değiştir</span>
-                           </div>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/png, image/jpeg, image/webp, image/gif" onChange={handleImageUpload} />
-                        <button onClick={() => fileInputRef.current?.click()} className="bg-discord-accent hover:bg-indigo-500 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center transition-colors">
-                           <span className="mr-2"><UploadIcon /></span>
-                           Fotoğraf Yükle
-                        </button>
-                    </div>
-                 </div>
-              </div>
-              
-              <div className="bg-[#2f3136] p-4 flex justify-end">
-                 <button onClick={() => setIsSettingsOpen(false)} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium text-sm transition-colors">Tamam</button>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {/* USER SETTINGS MODAL */}
+      {/* MODALS */}
+      {/* Settings Modal */}
       {isUserSettingsOpen && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center animate-fadeIn">
-           <div className="bg-[#36393f] w-[440px] rounded-lg shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100">
-              <div className="p-6">
-                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-white">Kullanıcı Ayarları</h2>
-                    <button onClick={() => setIsUserSettingsOpen(false)} className="text-discord-muted hover:text-discord-text transition-colors"><CloseIcon /></button>
-                 </div>
-                 
-                 <div className="space-y-6">
-                    <div className="flex flex-col items-center space-y-4">
-                        <div className="w-24 h-24 rounded-full overflow-hidden shadow-lg border-2 border-discord-dark relative group cursor-pointer" onClick={() => userFileInputRef.current?.click()}>
-                           <img src={currentUser?.avatar || DEFAULT_AVATAR} alt="User Avatar" className="w-full h-full object-cover" />
-                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              <span className="text-xs font-bold text-white">Değiştir</span>
-                           </div>
-                        </div>
-                        <h3 className="text-xl font-bold text-white">{currentUser?.name}</h3>
-                        <p className="text-discord-muted text-sm">#{currentUser?.id?.substring(0,4)}</p>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <input type="file" ref={userFileInputRef} className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleUserAvatarUpload} />
-                        <button onClick={() => userFileInputRef.current?.click()} className="bg-discord-accent hover:bg-indigo-500 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center transition-colors">
-                           <span className="mr-2"><UploadIcon /></span>
-                           Avatar Değiştir
-                        </button>
-                    </div>
-                 </div>
-              </div>
-              
-              <div className="bg-[#2f3136] p-4 flex justify-end">
-                 <button onClick={() => setIsUserSettingsOpen(false)} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium text-sm transition-colors">Tamam</button>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {/* CHANNEL SETTINGS MODAL */}
-      {channelModal.isOpen && (
-         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center animate-fadeIn">
-            <div className="bg-[#36393f] w-[440px] rounded-lg shadow-2xl overflow-hidden flex flex-col">
-               <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                     <h2 className="text-xl font-bold text-white">
-                         {channelModal.mode === 'create' ? 'Kanal Oluştur' : 'Kanal Düzenle'}
-                     </h2>
-                     <button onClick={() => setChannelModal({...channelModal, isOpen: false})} className="text-discord-muted hover:text-discord-text"><CloseIcon /></button>
+          <div className="absolute inset-0 bg-[#313338] z-50 flex animate-fadeIn">
+              <div className="w-[30%] bg-[#2b2d31] flex justify-end p-4 pt-12">
+                  <div className="w-48 text-gray-400 space-y-1">
+                      <h3 className="text-xs font-bold uppercase mb-2 px-2">Kullanıcı Ayarları</h3>
+                      <div className="px-2 py-1.5 bg-[#404249] text-white rounded cursor-pointer">Hesabım</div>
+                      <div className="px-2 py-1.5 hover:bg-[#35373c] rounded cursor-pointer">Profiller</div>
+                      <div className="px-2 py-1.5 hover:bg-[#35373c] rounded cursor-pointer">Gizlilik ve Güvenlik</div>
+                      <div className="h-[1px] bg-gray-700 my-2"></div>
+                      <div onClick={handleLogout} className="px-2 py-1.5 hover:bg-red-500/10 text-red-400 hover:text-red-500 rounded cursor-pointer flex items-center justify-between">
+                          <span>Çıkış Yap</span>
+                          <LogOutIcon className="w-4 h-4" />
+                      </div>
                   </div>
-                  
-                  <div className="space-y-4">
-                      <div>
-                          <label className="text-xs font-bold text-discord-muted uppercase mb-2 block">Kanal Tipi</label>
-                          <div className="flex items-center space-x-4">
-                              <div className={`flex-1 p-3 rounded border cursor-pointer flex items-center ${channelModal.type === 'text' ? 'bg-[#40444b] border-discord-accent' : 'bg-[#2f3136] border-transparent opacity-50 pointer-events-none'}`}>
-                                  <HashtagIcon className="mr-2" />
-                                  <span className="font-bold text-white">Metin</span>
-                              </div>
-                              <div className={`flex-1 p-3 rounded border cursor-pointer flex items-center ${channelModal.type === 'voice' ? 'bg-[#40444b] border-discord-accent' : 'bg-[#2f3136] border-transparent opacity-50 pointer-events-none'}`}>
-                                  <Volume2Icon className="mr-2" />
-                                  <span className="font-bold text-white">Ses</span>
-                              </div>
+              </div>
+              <div className="flex-1 p-12 overflow-y-auto">
+                  <div className="max-w-3xl">
+                      <h2 className="text-xl font-bold text-white mb-6">Hesabım</h2>
+                      
+                      <div className="bg-[#1e1f22] rounded-t-lg h-24 relative mb-16 bg-[url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center">
+                          <div className="absolute -bottom-9 left-4 flex items-center">
+                               <div className="relative group cursor-pointer">
+                                  <img src={currentUser?.avatar || DEFAULT_AVATAR} className="w-20 h-20 rounded-full border-[6px] border-[#1e1f22]" />
+                                  <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                      <UploadIcon className="text-white w-6 h-6" />
+                                  </div>
+                                  <input type="file" ref={userFileInputRef} onChange={handleUserAvatarUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" />
+                               </div>
+                               <div className="ml-4 mt-8">
+                                   <div className="text-xl font-bold text-white flex items-center">
+                                       {currentUser?.name}
+                                       <span className="ml-1 text-gray-400 font-medium text-base">{getDisplayId(currentUser)}</span>
+                                   </div>
+                               </div>
                           </div>
                       </div>
-                      
-                      <div>
-                          <label className="text-xs font-bold text-discord-muted uppercase mb-2 block">Kanal Adı</label>
-                          <input 
-                             type="text"
-                             value={modalInputName}
-                             onChange={(e) => setModalInputName(e.target.value)}
-                             placeholder="yeni-kanal"
-                             className="w-full bg-[#202225] text-white p-2 rounded border border-black/10 focus:border-discord-accent outline-none font-medium"
-                             autoFocus
-                          />
+
+                      <div className="bg-[#2b2d31] rounded-lg p-4 space-y-4">
+                          <div className="flex justify-between items-center">
+                              <div>
+                                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Görünen Ad</h3>
+                                  <p className="text-white">{currentUser?.name}</p>
+                              </div>
+                              <button className="bg-[#4e5058] px-4 py-1.5 rounded text-white text-sm hover:bg-[#6d6f78]">Düzenle</button>
+                          </div>
+                          <div className="flex justify-between items-center">
+                              <div>
+                                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">E-Posta</h3>
+                                  <p className="text-white">********@gmail.com <span className="text-green-400 text-xs ml-1">(Doğrulandı)</span></p>
+                              </div>
+                              <button className="bg-[#4e5058] px-4 py-1.5 rounded text-white text-sm hover:bg-[#6d6f78]">Düzenle</button>
+                          </div>
+                      </div>
+
+                      <div className="mt-8">
+                           <h2 className="text-xl font-bold text-white mb-4">Sunucu Profili</h2>
+                           <p className="text-gray-400 text-sm mb-4">Bu sunucudaki kimliğini özelleştir.</p>
+                           <div className="bg-[#2b2d31] p-4 rounded-lg flex items-center space-x-4">
+                               <div className="relative group cursor-pointer w-16 h-16 shrink-0">
+                                   <img src={serverIcon} className="w-full h-full rounded-full object-cover" />
+                                   <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                      <UploadIcon className="text-white w-5 h-5" />
+                                   </div>
+                                   <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" />
+                               </div>
+                               <div className="flex-1">
+                                   <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Sunucu Adı</label>
+                                   <input className="bg-[#1e1f22] text-white p-2 rounded w-full outline-none" value={serverName} onChange={e => setServerName(e.target.value)} />
+                               </div>
+                           </div>
                       </div>
                   </div>
-               </div>
-               
-               <div className="bg-[#2f3136] p-4 flex justify-between items-center">
-                  {channelModal.mode === 'edit' ? (
-                      <button onClick={deleteChannel} className="text-red-500 hover:underline text-sm font-medium flex items-center">
-                          <TrashIcon className="w-4 h-4 mr-1" /> Kanalı Sil
-                      </button>
-                  ) : <div></div>}
-                  <div className="flex space-x-3">
-                      <button onClick={() => setChannelModal({...channelModal, isOpen: false})} className="text-white hover:underline text-sm font-medium">İptal</button>
-                      <button onClick={handleChannelModalSubmit} className="bg-discord-accent hover:bg-indigo-500 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors">
-                          {channelModal.mode === 'create' ? 'Oluştur' : 'Kaydet'}
-                      </button>
+              </div>
+              <div className="absolute top-4 right-4 flex flex-col items-center cursor-pointer group" onClick={() => setIsUserSettingsOpen(false)}>
+                  <div className="border-2 border-gray-400 rounded-full p-1 group-hover:border-white transition-colors">
+                      <CloseIcon className="text-gray-400 group-hover:text-white" />
                   </div>
-               </div>
-            </div>
-         </div>
+                  <span className="text-xs text-gray-400 font-bold mt-1 group-hover:text-white">ESC</span>
+              </div>
+          </div>
       )}
 
-      {/* Invite Modal */}
-      {inviteData && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-           <div className="bg-[#36393f] p-8 rounded text-center">
-               <h1 className="text-white text-2xl font-bold mb-4">{inviteData.n} sunucusuna davet edildin!</h1>
-               <button onClick={acceptInvite} className="bg-discord-accent text-white px-6 py-2 rounded font-bold">Kabul Et</button>
-           </div>
-        </div>
+      {/* Settings Modal - Server Settings */}
+      {isSettingsOpen && !isUserSettingsOpen && (
+          <div className="absolute inset-0 bg-[#313338] z-50 flex items-center justify-center animate-fadeIn bg-opacity-95">
+               <div className="bg-[#313338] p-6 rounded-lg shadow-xl w-96 relative border border-black/20">
+                   <h2 className="text-2xl font-bold text-white mb-4">Sunucu Ayarları</h2>
+                   <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Sunucu Adı</label>
+                            <input 
+                                className="w-full bg-[#1e1f22] text-white p-2 rounded outline-none"
+                                value={serverName}
+                                onChange={(e) => setServerName(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Sunucu İkonu</label>
+                             <div className="flex items-center space-x-4">
+                                <img src={serverIcon} className="w-16 h-16 rounded-full object-cover" />
+                                <button onClick={() => fileInputRef.current?.click()} className="bg-discord-accent px-3 py-1 rounded text-white text-sm hover:bg-indigo-600">İkonu Değiştir</button>
+                             </div>
+                        </div>
+                   </div>
+                   <div className="mt-6 flex justify-end">
+                       <button onClick={() => setIsSettingsOpen(false)} className="bg-discord-accent px-4 py-2 rounded text-white font-bold hover:bg-indigo-600">Kaydet</button>
+                   </div>
+                   <button onClick={() => setIsSettingsOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><CloseIcon /></button>
+               </div>
+          </div>
       )}
+
+      {/* Channel Create/Edit Modal */}
+      {channelModal.isOpen && (
+          <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center animate-fadeIn">
+              <div className="bg-[#313338] p-6 rounded shadow-lg w-96 relative">
+                  <h2 className="text-xl font-bold text-white mb-4">
+                      {channelModal.mode === 'create' ? 'Kanal Oluştur' : 'Kanalı Düzenle'}
+                  </h2>
+                  <div className="mb-4">
+                      <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Kanal Türü</label>
+                      <div className="flex items-center space-x-4 bg-[#1e1f22] p-2 rounded">
+                          {channelModal.type === 'text' ? <HashtagIcon className="text-gray-400" /> : <Volume2Icon className="text-gray-400" />}
+                          <span className="text-white font-medium">{channelModal.type === 'text' ? 'Metin Kanalı' : 'Ses Kanalı'}</span>
+                      </div>
+                  </div>
+                  <div className="mb-6">
+                      <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Kanal Adı</label>
+                      <input 
+                          className="w-full bg-[#1e1f22] text-white p-2 rounded outline-none"
+                          value={modalInputName}
+                          onChange={e => setModalInputName(e.target.value.replace(/\s+/g, '-').toLowerCase())}
+                          placeholder="yeni-kanal"
+                          autoFocus
+                      />
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                      {channelModal.mode === 'edit' && (
+                          <button onClick={deleteChannel} className="text-red-400 hover:underline text-sm">Kanalı Sil</button>
+                      )}
+                      <div className="flex space-x-3 ml-auto">
+                          <button onClick={() => setChannelModal({ ...channelModal, isOpen: false })} className="text-white hover:underline text-sm px-4">İptal</button>
+                          <button onClick={handleChannelModalSubmit} className="bg-discord-accent px-4 py-2 rounded text-white text-sm font-bold hover:bg-indigo-600">
+                              {channelModal.mode === 'create' ? 'Oluştur' : 'Kaydet'}
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      )}
+
     </div>
   );
 };
