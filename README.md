@@ -1,4 +1,4 @@
-# XantaresCord (Damar Odası)
+# XantaresCord
 
 Discord benzeri, gerçek zamanlı sesli sohbet ve 1080p ekran paylaşımı yapabileceğiniz web tabanlı bir uygulama.
 
