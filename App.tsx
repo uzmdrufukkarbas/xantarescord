@@ -43,7 +43,7 @@ const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy
 const App: React.FC = () => {
   // --- Server Config ---
   const [serverUrl, setServerUrl] = useState("http://localhost:3001");
-  const [isServerModalOpen, setIsServerModalOpen] = useState(false);
+  const [isServerModalOpen, setIsServerModalOpen] = useState(true);
 
   // --- Auth State ---
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
@@ -135,10 +135,8 @@ const App: React.FC = () => {
     const savedServerUrl = localStorage.getItem('custom_socket_url');
     if (savedServerUrl) {
        setServerUrl(savedServerUrl);
-       connectSocket(savedServerUrl);
-    } else {
-       // Default connect if no saved URL
-       connectSocket("http://localhost:3001");
+       // Auto-connect removed so connection screen is always shown first
+       // connectSocket(savedServerUrl); 
     }
 
     return () => {
