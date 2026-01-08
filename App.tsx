@@ -75,6 +75,7 @@ const App: React.FC = () => {
   // Multi-user State
   const [onlineUsers, setOnlineUsers] = useState<VoiceUser[]>([]);
   const [currentUser, setCurrentUser] = useState<VoiceUser | null>(null);
+  const prevUsersRef = useRef<VoiceUser[]>([]);
   
   // Input State
   const [inputMessage, setInputMessage] = useState("");
@@ -345,6 +346,40 @@ const App: React.FC = () => {
 
       socket.on('user-update', (users: VoiceUser[]) => {
           setOnlineUsers(users);
+
+          // Sound Logic
+          const prevUsers = prevUsersRef.current;
+          
+          // Only calculate diff if we have previous data (avoid noise on init)
+          if (prevUsers.length > 0) {
+              // Find users who just joined a voice channel
+              const hasJoin = users.some(u => {
+                  const prev = prevUsers.find(p => p.id === u.id);
+                  // Current has voice, Previous (didn't exist OR didn't have voice)
+                  return u.voiceChannelId && (!prev || !prev.voiceChannelId);
+              });
+
+              // Find users who just left a voice channel
+              const hasLeave = prevUsers.some(p => {
+                  const curr = users.find(u => u.id === p.id);
+                  // Previous had voice, Current (doesn't exist OR doesn't have voice)
+                  return p.voiceChannelId && (!curr || !curr.voiceChannelId);
+              });
+
+              if (hasJoin) {
+                  const audio = new Audio("https://raw.githubusercontent.com/kurisubrooks/discord-sounds/master/sounds/user_join.mp3");
+                  audio.volume = 0.5;
+                  audio.play().catch(e => console.log("Audio play failed", e));
+              }
+              if (hasLeave) {
+                  const audio = new Audio("https://raw.githubusercontent.com/kurisubrooks/discord-sounds/master/sounds/user_leave.mp3");
+                  audio.volume = 0.5;
+                  audio.play().catch(e => console.log("Audio play failed", e));
+              }
+          }
+
+          prevUsersRef.current = users;
+
           if (socketRef.current) {
             const me = users.find(u => u.socketId === socketRef.current?.id);
             if (me) {
