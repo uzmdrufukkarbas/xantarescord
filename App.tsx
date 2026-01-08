@@ -55,8 +55,8 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // --- Persistent State (Server & Channels) ---
-  const [serverName, setServerName] = useState("Damar Odası");
-  const [serverIcon, setServerIcon] = useState("https://placehold.co/100x100?text=CS2");
+  const [serverName, setServerName] = useState("Xantarescord");
+  const [serverIcon, setServerIcon] = useState("https://placehold.co/100x100?text=Xantarescord");
   
   // Channels
   const [textChannels, setTextChannels] = useState<Channel[]>([{ id: 'default-text', name: 'sohbet-odası', type: 'text' }]);
