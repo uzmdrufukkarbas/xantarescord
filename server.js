@@ -3,8 +3,11 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
+
+// .env dosyasındaki değişkenleri yükle
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -15,13 +18,45 @@ app.use(express.static(path.join(__dirname, 'dist')));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Güvenlik için prodüksiyonda spesifik domain verilebilir
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
 
-const MESSAGES_DB_PATH = path.join(__dirname, 'messages.json');
-const USERS_DB_PATH = path.join(__dirname, 'users.json');
+// --- MONGODB BAĞLANTI AYARI ---
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.error("HATA: .env dosyasında MONGO_URI tanımlanmamış!");
+  process.exit(1);
+}
+
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('MongoDB Atlas bağlantısı başarıyla kuruldu.'))
+  .catch(err => console.error('MongoDB bağlantı hatası:', err));
+
+// --- MONGODB ŞEMALARI (VERİ MODELLERİ) ---
+
+// Kullanıcı Şeması
+const UserSchema = new mongoose.Schema({
+  id: { type: String, unique: true },
+  username: { type: String, unique: true },
+  password: { type: String },
+  avatar: { type: String },
+  isAdmin: { type: Boolean, default: false },
+  isBanned: { type: Boolean, default: false }
+});
+const User = mongoose.model('User', UserSchema);
+
+// Mesaj Şeması
+const MessageSchema = new mongoose.Schema({
+  channelId: { type: String },
+  id: { type: String },
+  text: { type: String },
+  sender: { type: Object }, // Gönderen kullanıcı objesi veya ismi
+  timestamp: { type: Date, default: Date.now },
+  isDeleted: { type: Boolean, default: false }
+});
+const Message = mongoose.model('Message', MessageSchema);
 
 // Veritabanı dosyalarının varlığını kontrol et, yoksa oluştur
 if (!fs.existsSync(MESSAGES_DB_PATH)) fs.writeFileSync(MESSAGES_DB_PATH, '{}');
