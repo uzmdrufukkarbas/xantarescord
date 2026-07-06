@@ -157,16 +157,17 @@ async function findUser(username) {
 // Aktif soket kullanıcıları (Ram'de tutulur)
 let connectedUsers = []; // Array of VoiceUser objects
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => { // async eklendi
   console.log('Soket bağlandı:', socket.id);
   let currentUser = null;
 
-  // Bağlanınca sohbet geçmişini gönder
-  socket.emit('chat-history', loadMessages());
+  // Bağlanınca sohbet geçmişini veritabanından çekip gönderir
+  const history = await loadMessages(); // await eklendi
+  socket.emit('chat-history', history);
 
   // --- AUTH İŞLEMLERİ ---
 
-  socket.on('auth-register', ({ username, password }) => {
+  socket.on('auth-register', async ({ username, password }) => { // async eklendi
       const cleanUsername = username ? username.trim() : "";
       const cleanPassword = password ? password.trim() : "";
 
@@ -175,11 +176,11 @@ io.on('connection', (socket) => {
           return;
       }
 
-      const existing = findUser(cleanUsername);
+      const existing = await findUser(cleanUsername); // await eklendi
       if (existing) {
           socket.emit('auth-error', 'Bu kullanıcı adı zaten alınmış.');
       } else {
-          const allUsers = loadUsers();
+          const allUsers = await loadUsers(); // await eklendi
           const isAdmin = allUsers.length === 0;
           const defaultAvatar = "https://placehold.co/100x100?text=" + cleanUsername.charAt(0).toUpperCase();
           
@@ -191,7 +192,7 @@ io.on('connection', (socket) => {
               isAdmin: isAdmin,
               isBanned: false
           };
-          saveUser(newUser);
+          await saveUser(newUser); // await eklendi
           socket.emit('auth-success', { 
               id: newUser.id, 
               name: newUser.username, 
@@ -201,11 +202,11 @@ io.on('connection', (socket) => {
       }
   });
 
-  socket.on('auth-login', ({ username, password }) => {
+  socket.on('auth-login', async ({ username, password }) => { // async eklendi
       const cleanUsername = username ? username.trim() : "";
       const cleanPassword = password ? password.trim() : "";
 
-      const user = findUser(cleanUsername);
+      const user = await findUser(cleanUsername); // await eklendi
       
       if (user) {
           if (user.password === cleanPassword) {
@@ -238,7 +239,6 @@ io.on('connection', (socket) => {
           isDeafened: false,
           isStreaming: false
       };
-      // Varsa eski oturumu temizle
       connectedUsers = connectedUsers.filter(u => u.id !== currentUser.id);
       connectedUsers.push(currentUser);
       io.emit('user-update', connectedUsers);
@@ -263,34 +263,33 @@ io.on('connection', (socket) => {
       io.emit('user-update', connectedUsers);
   });
 
-  socket.on('send-message', ({ channelId, message }) => {
-      saveMessage(channelId, message);
+  socket.on('send-message', async ({ channelId, message }) => { // async eklendi
+      await saveMessage(channelId, message); // await eklendi
       io.emit('new-message', { channelId, message });
   });
 
-  socket.on('delete-message', ({ channelId, messageId }) => {
-      const updated = updateMessageAsDeleted(channelId, messageId);
+  socket.on('delete-message', async ({ channelId, messageId }) => { // async eklendi
+      const updated = await updateMessageAsDeleted(channelId, messageId); // await eklendi
       if (updated) {
           io.emit('message-deleted', { channelId, messageId, updatedMessage: updated });
       }
   });
 
-  socket.on('update-profile', ({ avatar }) => {
+  socket.on('update-profile', async ({ avatar }) => { // async eklendi
       if (!currentUser) return;
       currentUser.avatar = avatar;
-      updateUserAvatar(currentUser.id, avatar);
+      await updateUserAvatar(currentUser.id, avatar); // await eklendi
       io.emit('user-update', connectedUsers);
   });
 
-  // WebRTC Sinyalleşme (P2P bağlantı için sunucu üzerinden mesajlaşma)
   socket.on('signal', ({ target, signal }) => {
       io.to(target).emit('signal', { sender: socket.id, signal });
   });
 
-  socket.on('admin-ban-user', ({ targetUserId }) => {
+  socket.on('admin-ban-user', async ({ targetUserId }) => { // async eklendi
       if (!currentUser || !currentUser.isAdmin) return;
-      if (banUserInDb(targetUserId)) {
-          // Banlanan kullanıcıyı bul ve at
+      const banned = await banUserInDb(targetUserId); // await eklendi
+      if (banned) {
           const targetSocketUser = connectedUsers.find(u => u.id === targetUserId);
           if (targetSocketUser) {
               io.to(targetSocketUser.socketId).emit('auth-error', 'Banlandınız.');
