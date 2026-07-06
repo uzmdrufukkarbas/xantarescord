@@ -62,93 +62,96 @@ const Message = mongoose.model('Message', MessageSchema);
 if (!fs.existsSync(MESSAGES_DB_PATH)) fs.writeFileSync(MESSAGES_DB_PATH, '{}');
 if (!fs.existsSync(USERS_DB_PATH)) fs.writeFileSync(USERS_DB_PATH, '[]');
 
-// --- Yardımcı Fonksiyonlar ---
-function loadMessages() {
-    try { 
-        const data = fs.readFileSync(MESSAGES_DB_PATH, 'utf8');
-        return data.length > 0 ? JSON.parse(data) : {};
-    } catch (e) { return {}; }
+// --- Yardımcı Fonksiyonlar (MongoDB Sürümü) ---
+
+async function loadMessages() {
+    try {
+        // Tüm kanallardaki mesajları getirir. 
+        // JSON yapına sadık kalmak için kanalId bazlı bir obje döndürüyoruz.
+        const messages = await Message.find({});
+        const db = {};
+        messages.forEach(msg => {
+            if (!db[msg.channelId]) db[msg.channelId] = [];
+            db[msg.channelId].push(msg);
+        });
+        return db;
+    } catch (e) { 
+        console.error("Mesaj yükleme hatası:", e);
+        return {}; 
+    }
 }
 
-function saveMessage(channelId, message) {
+async function saveMessage(channelId, messageData) {
     try {
-        const db = loadMessages();
-        if (!db[channelId]) db[channelId] = [];
-        db[channelId].push(message);
-        
-        // --- BU SATIRI SİLDİK VEYA YORUMA ALDIK ---
-        // if (db[channelId].length > 500) db[channelId] = db[channelId].slice(-500);
-        
-        fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify(db, null, 2));
+        const newMessage = new Message({
+            channelId: channelId,
+            id: messageData.id,
+            text: messageData.text,
+            sender: messageData.sender // Mesajı gönderen obje veya isim
+        });
+        await newMessage.save();
+        // Mesaj sınırı (slice-500) tamamen kaldırıldı, doğrudan DB'ye ekleniyor.
     } catch (e) {
         console.error("Mesaj kaydetme hatası:", e);
     }
 }
 
-function updateMessageAsDeleted(channelId, messageId) {
+async function updateMessageAsDeleted(channelId, messageId) {
     try {
-        const db = loadMessages();
-        if (db[channelId]) {
-            const msgIndex = db[channelId].findIndex(m => m.id === messageId);
-            if (msgIndex !== -1) {
-                db[channelId][msgIndex].isDeleted = true;
-                db[channelId][msgIndex].text = "Bu mesaj silindi.";
-                db[channelId][msgIndex].replyTo = undefined;
-                fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify(db, null, 2));
-                return db[channelId][msgIndex];
-            }
-        }
+        // Mesajı bulup içeriğini siliyoruz ve silindi olarak işaretliyoruz
+        const updatedMessage = await Message.findOneAndUpdate(
+            { channelId: channelId, id: messageId },
+            { 
+                isDeleted: true, 
+                text: "Bu mesaj silindi." 
+            },
+            { new: true } // Güncellenmiş yeni veriyi dönmesi için
+        );
+        return updatedMessage;
     } catch (e) {
         console.error("Mesaj güncelleme hatası:", e);
     }
     return null;
 }
 
-function loadUsers() {
-    try { return JSON.parse(fs.readFileSync(USERS_DB_PATH, 'utf8')); } catch (e) { return []; }
+async function loadUsers() {
+    try { 
+        return await User.find({}); 
+    } catch (e) { 
+        return []; 
+    }
 }
 
-function saveUser(user) {
+async function saveUser(userData) {
     try {
-        const users = loadUsers();
-        users.push(user);
-        fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
+        const newUser = new User(userData);
+        await newUser.save();
     } catch (e) {
         console.error("Kullanıcı kaydetme hatası:", e);
     }
 }
 
-function updateUserAvatar(userId, newAvatar) {
+async function updateUserAvatar(userId, newAvatar) {
     try {
-        const users = loadUsers();
-        const index = users.findIndex(u => u.id === userId);
-        if (index !== -1) {
-            users[index].avatar = newAvatar;
-            fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
-        }
+        await User.findOneAndUpdate({ id: userId }, { avatar: newAvatar });
     } catch (e) {
-        console.error("Kullanıcı güncelleme hatası:", e);
+        console.error("Kullanıcı avatar güncelleme hatası:", e);
     }
 }
 
-function banUserInDb(userId) {
+async function banUserInDb(userId) {
     try {
-        const users = loadUsers();
-        const index = users.findIndex(u => u.id === userId);
-        if (index !== -1) {
-            users[index].isBanned = true;
-            fs.writeFileSync(USERS_DB_PATH, JSON.stringify(users, null, 2));
-            return true;
-        }
+        const updated = await User.findOneAndUpdate({ id: userId }, { isBanned: true });
+        return !!updated;
     } catch (e) {
         console.error("Banlama hatası:", e);
     }
     return false;
 }
 
-function findUser(username) {
-    const users = loadUsers();
-    return users.find(u => u.username.toLowerCase() === username.toLowerCase());
+async function findUser(username) {
+    // Büyük/küçük harf duyarsız (case-insensitive) arama yapar
+    return await User.findOne({ username: new RegExp('^' + username + '$', 'i') });
 }
 
 // Aktif soket kullanıcıları (Ram'de tutulur)
