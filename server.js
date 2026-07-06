@@ -40,8 +40,10 @@ function saveMessage(channelId, message) {
         const db = loadMessages();
         if (!db[channelId]) db[channelId] = [];
         db[channelId].push(message);
-        // Limit 500 mesaja çıkarıldı
-        if (db[channelId].length > 500) db[channelId] = db[channelId].slice(-500);
+        
+        // --- BU SATIRI SİLDİK VEYA YORUMA ALDIK ---
+        // if (db[channelId].length > 500) db[channelId] = db[channelId].slice(-500);
+        
         fs.writeFileSync(MESSAGES_DB_PATH, JSON.stringify(db, null, 2));
     } catch (e) {
         console.error("Mesaj kaydetme hatası:", e);
