@@ -1,7 +1,7 @@
 {
   "name": "xantarescord",
-  "version": "1.0.0",
-  "description": "Discord benzeri React ve Node.js uygulaması",
+  "version": "2.0.0",
+  "description": "Eşsiz Uygulama",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
