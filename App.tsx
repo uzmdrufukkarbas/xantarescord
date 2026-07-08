@@ -899,23 +899,9 @@ const App: React.FC = () => {
   const statusUI = getStatusUI();
 
   // --- JSX ---
-  if (isServerModalOpen) {
-      return (
-          <div className="flex h-screen w-screen bg-[#202225] items-center justify-center font-sans text-white relative flex-col">
-              <h1 className="text-6xl font-black text-discord-accent mb-12 tracking-widest drop-shadow-2xl select-none">XANTARESCORD</h1>
-              <div className="bg-[#313338] p-8 rounded shadow-lg w-96 relative z-10">
-                   <h2 className="text-2xl font-bold mb-4">Sunucu Bağlantısı</h2>
-                   <p className="text-gray-400 text-sm mb-4">Sunucunun adresini girin.</p>
-                   
-                   <input 
-                      className="w-full bg-[#1e1f22] p-2 rounded mb-4 text-white" 
-                      value={serverUrl} 
-                      onChange={e => setServerUrl(e.target.value)} 
-                      placeholder="http://localhost:3001"
-                   />
-                   <button onClick={handleServerUrlSubmit} className="bg-discord-accent w-full py-2 rounded font-bold hover:bg-indigo-600 transition-colors">Bağlan</button>
-              </div>
-          </div>
+  // Eski dinamik satır: const socket = io(serverUrl);
+// YENİ SATIR:
+const socket = io("https://xantarescordv2.duckdns.org");
       );
   }
 
