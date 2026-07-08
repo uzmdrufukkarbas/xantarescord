@@ -485,7 +485,7 @@ const App: React.FC = () => {
           });
 
       } catch (e) {
-          consoleerror("Mikrofon hatası", e);
+          console.error("Mikrofon hatası", e);
           alert("Mikrofona erişilemedi.");
       }
   };
