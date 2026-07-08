@@ -260,7 +260,7 @@ const App: React.FC = () => {
       }
 
       const url = urlInput.replace(/\/$/, "");
-      const socket = io(url, {
+      const socket = io("https://xantarescord-server.xantarescordv2.duckdns.org");
           transports: ['websocket', 'polling'],
           reconnection: true,
           reconnectionAttempts: 5,
